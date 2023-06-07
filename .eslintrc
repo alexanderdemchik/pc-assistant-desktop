@@ -1,0 +1,63 @@
+{
+    "settings": {
+        "import/extensions": [".js", ".ts", ".d.ts"],
+        "import/resolver": {
+            "node": {
+                "extensions": [".js", ".ts", ".d.ts"]
+            },
+            "typescript": {
+                "alwaysTryTypes": true
+            }
+        },
+        "import/parsers": {
+            "@typescript-eslint/parser": [".ts", ".tsx", ".d.ts"]
+        }
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:import/errors",
+        "plugin:import/warnings",
+        "plugin:import/typescript",
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+        "plugin:prettier/recommended",
+        "plugin:jest/recommended"
+    ],
+    "globals": {
+        "global": true
+    },
+    "env": {
+        "es6": true,
+        "node": true
+    },
+    "rules": {
+        "semi": "error",
+        "no-nested-ternary": "error",
+        "linebreak-style": ["error", "unix"],
+        "quotes": [
+            2,
+            "single",
+            {
+                "avoidEscape": true,
+                "allowTemplateLiterals": true
+            }
+        ],
+        "prettier/prettier": ["error"],
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "error",
+        "@typescript-eslint/no-unused-vars": "error",
+        "jest/expect-expect": [
+            "error",
+            {
+                "assertFunctionNames": ["expect", "request.**.expect", "fc.assert"]
+            }
+        ]
+    },
+    "plugins": ["@typescript-eslint/eslint-plugin", "import", "jest", "prettier"]
+}
