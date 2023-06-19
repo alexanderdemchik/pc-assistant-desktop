@@ -1,11 +1,18 @@
-import { app, BrowserWindow, ipcMain, protocol, session, shell } from 'electron';
+process.env.FORCE_COLOR = 'true'; // required for chalk to work
+
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import url from 'url';
-import { APP_PROTOCOL, SERVER_URL } from './constants';
-import { getConfig } from './main/config.helper';
-import axios from 'axios';
-import { initSocketConnection } from './main/socket.helper';
-import { handleAuthWithYandexToken } from './main/auth.helper';
+import { APP_PROTOCOL } from './constants';
+import { config, initConfig, updateConfigWithRemoteConfig } from './main/config';
+import * as ws from './main/ws';
+import { handleAuthWithYandexToken } from './main/auth';
+import { initMainLogger, logger } from './main/logger';
+import { registerSchemesAsPrivileged, registerStaticProtocol, setupAutolaunch, setupCSP } from './main/helpers';
+import * as trayManager from './main/tray';
+import * as windowManager from './main/window';
+import { eventsManager } from './main/events';
+import { EventsNamesEnum } from './types/eventsNames.enum';
+import { IpcEventNamesEnum } from './types/ipcEventsNames.enum';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 
@@ -13,6 +20,7 @@ const IS_DEV = process.env.NODE_ENV === 'development';
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
+
 if (IS_DEV && process.platform === 'win32') {
     // Set the path of electron.exe and your app.
     // These two additional parameters are only available on windows.
@@ -22,8 +30,11 @@ if (IS_DEV && process.platform === 'win32') {
     app.setAsDefaultProtocolClient(APP_PROTOCOL);
 }
 
+registerSchemesAsPrivileged();
+
 app.on('open-url', function (event, url) {
     event.preventDefault();
+    handleAuthWithYandexToken(url);
 });
 
 const gotTheLock = app.requestSingleInstanceLock();
@@ -37,101 +48,57 @@ if (!gotTheLock) {
             const url = argv.find((arg) => arg.startsWith(APP_PROTOCOL));
             handleAuthWithYandexToken(url);
         }
+        windowManager.instance?.focus();
     });
 }
-
-protocol.registerSchemesAsPrivileged([
-    {
-        scheme: 'static',
-        privileges: {
-            stream: true,
-            bypassCSP: true,
-        },
-    },
-]);
-const createWindow = async () => {
-    // Create the browser window.
-    const mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
-            //@ts-ignore
-            preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-        },
-    });
-
-    mainWindow.setMenu(null);
-
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        shell.openExternal(url);
-        return { action: 'deny' };
-    });
-
-    // and load the index.html of the app.
-    //@ts-ignore
-    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
-};
 
 async function onReady() {
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-        callback({
-            responseHeaders: {
-                ...details.responseHeaders,
-                'Content-Security-Policy': [
-                    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://mc.yandex.ru https://yastatic.net",
-                ],
-            },
-        });
+    setupCSP();
+
+    registerStaticProtocol();
+
+    await initConfig();
+    await initMainLogger(config.logLevel);
+    await updateConfigWithRemoteConfig();
+
+    setupAutolaunch();
+
+    trayManager.create();
+
+    if (config.token) {
+        ws.init();
+    } else {
+        windowManager.create();
+        ipcMain.emit(IpcEventNamesEnum.REQUIRE_AUTH);
+    }
+
+    eventsManager.on(EventsNamesEnum.WS_CONNECTED, () => {
+        logger.debug('WS Connected');
+        windowManager.emit(IpcEventNamesEnum.CONNECTED);
     });
 
-    protocol.registerFileProtocol('static', (request, callback) => {
-        const { host, pathname } = url.parse(request.url);
-
-        callback({
-            path: path.normalize(`${app.getAppPath()}/${host + pathname}`),
-        });
+    eventsManager.on(EventsNamesEnum.WS_CONNECT_ERROR, () => {
+        windowManager.create();
+        windowManager.emit(IpcEventNamesEnum.REQUIRE_AUTH);
     });
 
-    ipcMain.handle('get-auth-state', async () => {
-        console.log('get-auth-state');
-        const token = (await getConfig()).token;
-
-        if (token) {
-            try {
-                await axios.get(`${SERVER_URL}/user`, { headers: { Authorization: `Bearer ${token}` } });
-                initSocketConnection(token);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        return false;
+    ipcMain.handle(IpcEventNamesEnum.GET_CONNECTION_STATUS, () => {
+        return { connected: ws.isConnected, loading: ws.isConnecting };
     });
 
-    createWindow();
+    ipcMain.handle(IpcEventNamesEnum.GET_CONFIG, () => {
+        return config;
+    });
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', onReady);
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
+
+app.on('window-all-closed', () => {});
 
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        windowManager.create();
     }
 });

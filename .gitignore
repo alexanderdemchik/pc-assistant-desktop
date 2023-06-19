@@ -94,3 +94,5 @@ out/
 **/*.code-workspace
 
 config.json
+
+*.log

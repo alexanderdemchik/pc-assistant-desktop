@@ -6,12 +6,12 @@ import { MakerRpm } from "@electron-forge/maker-rpm"
 import { WebpackPlugin } from "@electron-forge/plugin-webpack"
 import { mainConfig } from "./webpack.main.config"
 import { rendererConfig } from "./webpack.renderer.config"
-import { APP_PROTOCOL } from "./src/constants"
+import { APP_NAME, APP_PROTOCOL,  } from "./src/constants"
 
 const config: ForgeConfig = {
     packagerConfig: {
-        name: "Alice PC Manager",
-        extraResource: ["package.json"],
+        name: APP_NAME,
+        extraResource: ["static"],
         asar: false,
         protocols: [
             {
@@ -19,6 +19,7 @@ const config: ForgeConfig = {
                 schemes: [APP_PROTOCOL],
             },
         ],
+        icon: './static/icons/app_icon'
     },
     rebuildConfig: {},
     makers: [
@@ -30,6 +31,8 @@ const config: ForgeConfig = {
     plugins: [
         new WebpackPlugin({
             mainConfig,
+            port: 3001,
+            loggerPort: 3002,
             renderer: {
                 config: rendererConfig,
                 entryPoints: [
