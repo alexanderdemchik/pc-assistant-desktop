@@ -3,6 +3,7 @@ import { getResourcesFolderPath } from './helpers';
 import path from 'path';
 import * as windowmanager from './window';
 import * as ws from './ws';
+import { APP_NAME } from '../constants';
 
 export let instance: Tray;
 
@@ -11,13 +12,20 @@ export function create() {
         instance = new Tray(path.join(getResourcesFolderPath(), getAppIconPath()));
         const contextMenu = Menu.buildFromTemplate([
             {
+                label: 'Сменить пользователя',
+                click: () => {
+                    ws.destroy();
+                    windowmanager.create();
+                }
+            },
+            {
                 label: 'Выход',
                 click() {
                     app.quit();
                 },
             },
         ]);
-        instance.setToolTip('PC Manager');
+        instance.setToolTip(APP_NAME);
         instance.setContextMenu(contextMenu);
 
         instance.on('click', () => {

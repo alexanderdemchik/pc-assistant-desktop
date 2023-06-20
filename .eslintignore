@@ -11,6 +11,3 @@ localCompiledLibraries
 build
 swagger.json
 @generated
-src/v1/menu/docs/menu2.json
-src/v1/customer/account/docs/blackListedWords.json
-src/v1/customer/account/mocks/blackListedWords.mock.json

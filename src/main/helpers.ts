@@ -38,7 +38,7 @@ export function registerStaticProtocol() {
     protocol.registerFileProtocol('res', (request, callback) => {
         const { host, pathname } = url.parse(request.url);
         callback({
-            path: path.normalize(`${app.getAppPath()}/${host + pathname}`),
+            path: process.env.NODE_ENV === 'development' ? path.normalize(`${app.getAppPath()}/${host + pathname}`) : path.normalize(`${process.resourcesPath}/${host + pathname}`),
         });
     });
 }

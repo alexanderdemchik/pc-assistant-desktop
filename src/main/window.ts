@@ -14,6 +14,7 @@ export const create = async () => {
                 //@ts-ignore
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
             },
+            backgroundColor: '#121212',
         });
 
         instance.setMenu(null);
@@ -29,7 +30,7 @@ export const create = async () => {
 
         instance.on('closed', () => {
             instance = null;
-        })
+        });
 
         if (process.env.NODE_ENV === 'development') {
             instance.webContents.openDevTools();

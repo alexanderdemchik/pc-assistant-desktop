@@ -1,7 +1,7 @@
 {
-  "name": "desktop-manager",
+  "name": "voice-pc-assistant",
   "productName": "Voice PC Assistant",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "My Electron application description",
   "main": ".webpack/main",
   "scripts": {
@@ -33,6 +33,10 @@
     "electron": "24.4.0",
     "eslint": "^8.0.1",
     "eslint-plugin-import": "^2.25.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-jest": "^27.2.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
     "fork-ts-checker-webpack-plugin": "^7.2.13",
     "node-loader": "^2.0.0",
     "style-loader": "^3.0.0",

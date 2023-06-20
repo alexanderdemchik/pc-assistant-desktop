@@ -22,6 +22,7 @@ export const AppContext = createContext<{
     connection: {
         loading: boolean;
         connected: boolean;
+        isError: boolean;
     };
     config: {
         yandexClientId: string;
@@ -34,18 +35,19 @@ function App() {
     const [connection, setConnection] = useState({
         loading: true,
         connected: false,
+        isError: false,
     });
     const [config, setConfig] = useState({ yandexClientId: '' });
 
     useEffect(() => {
         API.onConnected(() => {
             logger.debug('[APP] onConnected');
-            setConnection({ loading: false, connected: true });
+            setConnection({ loading: false, connected: true, isError: false });
         });
 
         API.onRequireAuth(() => {
             logger.debug('[APP] onRequireAuth');
-            setConnection({ loading: false, connected: false });
+            setConnection({ loading: false, connected: false, isError: connection.isError });
         });
 
         (() => {
@@ -61,6 +63,10 @@ function App() {
     const render = () => {
         if (!connection.connected) {
             return <Login />;
+        }
+
+        if (connection.isError) {
+            return "Технические проблемы. Попробуйте позже";
         }
 
         return <ConnectedPage />;

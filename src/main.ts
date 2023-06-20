@@ -72,18 +72,24 @@ async function onReady() {
         ipcMain.emit(IpcEventNamesEnum.REQUIRE_AUTH);
     }
 
+    logger.debug(app.getVersion());
+
     eventsManager.on(EventsNamesEnum.WS_CONNECTED, () => {
         logger.debug('WS Connected');
         windowManager.emit(IpcEventNamesEnum.CONNECTED);
     });
 
-    eventsManager.on(EventsNamesEnum.WS_CONNECT_ERROR, () => {
-        windowManager.create();
-        windowManager.emit(IpcEventNamesEnum.REQUIRE_AUTH);
+    eventsManager.on(EventsNamesEnum.WS_CONNECT_ERROR, (e: Error) => {
+        if (e.message === 'Auth error' && !ws.isErrorShown) {
+            windowManager.create();
+            windowManager.emit(IpcEventNamesEnum.REQUIRE_AUTH);
+        } else {
+            windowManager.emit(IpcEventNamesEnum.CONNECT_ERROR);
+        }
     });
 
     ipcMain.handle(IpcEventNamesEnum.GET_CONNECTION_STATUS, () => {
-        return { connected: ws.isConnected, loading: ws.isConnecting };
+        return { connected: ws.isConnected, loading: ws.isConnecting, isError: !!ws.error };
     });
 
     ipcMain.handle(IpcEventNamesEnum.GET_CONFIG, () => {

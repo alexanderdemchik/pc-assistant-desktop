@@ -21,7 +21,7 @@ export async function initConfig() {
     const defaultConfig = process.env.NODE_ENV === 'development' ? defaultDevConfig : defaultProdConfig;
 
     if (!config) {
-        const configFilePath = path.join(app.getAppPath(), APP_CONFIG_FILE);
+        const configFilePath = path.join(process.resourcesPath, APP_CONFIG_FILE);
         let descriptor;
         try {
             descriptor = await open(configFilePath);
@@ -43,7 +43,7 @@ export async function initConfig() {
 export async function updateConfigValue(key: string, value: string) {
     config[key] = value;
 
-    const configFilePath = path.join(app.getAppPath(), APP_CONFIG_FILE);
+    const configFilePath = path.join(process.resourcesPath, APP_CONFIG_FILE);
 
     await writeFile(configFilePath, JSON.stringify(config, null, 2));
 }
@@ -73,7 +73,7 @@ export async function updateConfigWithRemoteConfig() {
 
             config = { ...config, ...remoteConfig };
 
-            const configFilePath = path.join(app.getAppPath(), APP_CONFIG_FILE);
+            const configFilePath = path.join(process.resourcesPath, APP_CONFIG_FILE);
 
             await writeFile(configFilePath, JSON.stringify(config, null, 2));
         }
