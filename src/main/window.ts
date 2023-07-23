@@ -1,6 +1,36 @@
-import { BrowserWindow, shell } from 'electron';
+import { BrowserWindow, ipcMain, shell } from 'electron';
+import { EventsNamesEnum, eventsManager } from './events';
+import { IpcEventNamesEnum } from '../types/ipcEventsNames.enum';
+import { remoteCommandsReceiver } from './commands-receiver';
+import { config } from './config';
+import { isAuthorized } from './auth-manager';
 
 export let instance: BrowserWindow;
+
+export function setupEventsListeners() {
+    eventsManager.on(EventsNamesEnum.AUTH_REQUIRED, async () => {
+        await create();
+        emit(IpcEventNamesEnum.AUTH_REQUIRED);
+    });
+
+    eventsManager.on(EventsNamesEnum.TOKEN_RECEIVED, () => {
+        this.emit(IpcEventNamesEnum.AUTH_SUCCESS);
+        instance?.focus();
+    });
+
+    eventsManager.on(EventsNamesEnum.CONNECTED, () => {
+        this.emit(IpcEventNamesEnum.CONNECTED);
+    });
+
+    ipcMain.handle(IpcEventNamesEnum.GET_CONNECTION_STATUS, () => {
+        const { connected, error } = remoteCommandsReceiver.getState();
+        return { connected: connected, authorized: isAuthorized };
+    });
+
+    ipcMain.handle(IpcEventNamesEnum.GET_CONFIG, () => {
+        return config;
+    });
+}
 
 export const create = async () => {
     if (!instance) {
@@ -13,6 +43,7 @@ export const create = async () => {
             webPreferences: {
                 //@ts-ignore
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+                contextIsolation: false,
             },
             backgroundColor: '#121212',
         });
@@ -26,7 +57,7 @@ export const create = async () => {
 
         // and load the index.html of the app.
         //@ts-ignore
-        instance.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+        await instance.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
         instance.on('closed', () => {
             instance = null;

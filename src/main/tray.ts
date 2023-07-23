@@ -2,7 +2,6 @@ import { Menu, Tray, app } from 'electron';
 import { getResourcesFolderPath } from './helpers';
 import path from 'path';
 import * as windowmanager from './window';
-import * as ws from './ws';
 import { APP_NAME } from '../constants';
 
 export let instance: Tray;
@@ -14,9 +13,9 @@ export function create() {
             {
                 label: 'Сменить пользователя',
                 click: () => {
-                    ws.destroy();
+                    // ws.destroy();
                     windowmanager.create();
-                }
+                },
             },
             {
                 label: 'Выход',
@@ -29,9 +28,9 @@ export function create() {
         instance.setContextMenu(contextMenu);
 
         instance.on('click', () => {
-            if (!ws.isConnected && !ws.isConnecting) {
-                windowmanager.create();
-            }
+            // if (!ws.isConnected && !ws.isConnecting) {
+            //     windowmanager.create();
+            // }
         });
     }
 }

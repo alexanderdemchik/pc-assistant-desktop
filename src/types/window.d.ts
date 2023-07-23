@@ -1,9 +1,11 @@
+import { IpcRenderer } from 'electron';
+
 declare global {
     interface Window {
-        API: any;
+        ipcRenderer: IpcRenderer;
     }
 
-    const API: any;
+    const ipcRenderer: IpcRenderer;
 }
 
 export {};

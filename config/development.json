@@ -1,5 +1,4 @@
 {
-    "logLevel": "debug",
-    "serverUrl": "http://localhost:8000",
+    "serverUrl": "https://pcmanager.aliaksandrdzemchyk.site",
     "yandexClientId": "6843c16a576b469a9b739de47bad5ac9"
 }

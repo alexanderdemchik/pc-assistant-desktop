@@ -1,5 +1,7 @@
+import { sendLogByIPC } from './api';
+
 export default {
-    info: API.sendLogByIPC('info'),
-    error: API.sendLogByIPC('error'),
-    debug: API.sendLogByIPC('debug'),
-}
+    info: sendLogByIPC('info'),
+    error: sendLogByIPC('error'),
+    debug: sendLogByIPC('debug'),
+};

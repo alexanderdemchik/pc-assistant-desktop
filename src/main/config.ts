@@ -9,7 +9,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { logger } from './logger';
 
-interface IConfig {
+export interface IConfig {
     deviceId?: string;
     token?: string;
     [key: string]: string;
@@ -17,21 +17,24 @@ interface IConfig {
 
 export let config: IConfig = null;
 
+const configFilePath = path.join(app.getPath('userData'), APP_CONFIG_FILE);
 export async function initConfig() {
     const defaultConfig = process.env.NODE_ENV === 'development' ? defaultDevConfig : defaultProdConfig;
-
+    console.log(defaultConfig);
     if (!config) {
-        const configFilePath = path.join(process.resourcesPath, APP_CONFIG_FILE);
         let descriptor;
         try {
-            descriptor = await open(configFilePath);
-            config = JSON.parse(await descriptor.readFile({ encoding: 'utf-8' }));
-            await writeFile(configFilePath, JSON.stringify({ ...defaultConfig, ...config }, null, 2));
+            descriptor = await open(configFilePath, 'r+');
+            const data = await descriptor.readFile({ encoding: 'utf-8' });
+
+            config = JSON.parse(data);
+            logger.debug(data);
+
+            await descriptor.writeFile(JSON.stringify({ ...defaultConfig, ...config }, null, 2));
         } catch (e) {
-            if (e.code === 'ENOENT') {
-                config = { ...defaultConfig, deviceId: randomUUID() };
-                await writeFile(configFilePath, JSON.stringify(config, null, 2));
-            }
+            logger.error('%o', e);
+            config = { ...defaultConfig, deviceId: randomUUID() };
+            await writeFile(configFilePath, JSON.stringify(config, null, 2));
         } finally {
             await descriptor?.close();
         }
@@ -41,9 +44,8 @@ export async function initConfig() {
 }
 
 export async function updateConfigValue(key: string, value: string) {
+    logger.debug(`updateConfigValue ${key} ${value}`);
     config[key] = value;
-
-    const configFilePath = path.join(process.resourcesPath, APP_CONFIG_FILE);
 
     await writeFile(configFilePath, JSON.stringify(config, null, 2));
 }
@@ -72,8 +74,6 @@ export async function updateConfigWithRemoteConfig() {
             logger.info('Received remote config %o', remoteConfig);
 
             config = { ...config, ...remoteConfig };
-
-            const configFilePath = path.join(process.resourcesPath, APP_CONFIG_FILE);
 
             await writeFile(configFilePath, JSON.stringify(config, null, 2));
         }

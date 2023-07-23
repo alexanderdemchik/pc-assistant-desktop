@@ -1,7 +1,15 @@
 import axios from 'axios';
-import { config, updateConfigValue } from './config';
-import { ipcMain } from 'electron';
-import * as ws from './ws';
+import { config, updateConfigValue } from '../config';
+import { EventsNamesEnum, eventsManager } from '../events';
+
+export let isAuthorized = false;
+
+export function init() {
+    isAuthorized = !!config.token;
+    eventsManager.on(EventsNamesEnum.AUTH_REQUIRED, () => {
+        isAuthorized = false;
+    });
+}
 
 export async function handleAuthWithYandexToken(yredirecturl: string) {
     const tokenExtractionRegex = /access_token=(.*?)&/g;
@@ -13,11 +21,13 @@ export async function handleAuthWithYandexToken(yredirecturl: string) {
         const token: string = res.data.accessToken;
         await updateConfigValue('token', token);
 
-        ws.init();
+        eventsManager.emit(EventsNamesEnum.TOKEN_RECEIVED, token);
+
+        isAuthorized = true;
 
         return token;
     } catch (e) {
-        ipcMain.emit('auth-error');
+        eventsManager.emit(EventsNamesEnum.TOKEN_RECEIVE_ERROR);
     }
 
     return null;

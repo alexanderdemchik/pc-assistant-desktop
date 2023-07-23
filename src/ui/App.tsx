@@ -5,6 +5,8 @@ import Loader from './components/Loader';
 import { CssBaseline, ThemeProvider, createTheme, styled } from '@mui/material';
 import { theme } from './theme';
 import ConnectedPage from './pages/Connected';
+import { IpcEventNamesEnum } from '../types/ipcEventsNames.enum';
+import { eventsManager, getConfig, getConnectionStatus } from './api';
 
 const StyledLoaderWrapper = styled('div')(({ theme }) => ({
     position: 'absolute',
@@ -20,9 +22,8 @@ const StyledLoaderWrapper = styled('div')(({ theme }) => ({
 
 export const AppContext = createContext<{
     connection: {
-        loading: boolean;
         connected: boolean;
-        isError: boolean;
+        authorized: boolean;
     };
     config: {
         yandexClientId: string;
@@ -32,51 +33,49 @@ export const AppContext = createContext<{
 
 function App() {
     const [showLoader, setShowLoader] = useState(false);
-    const [connection, setConnection] = useState({
-        loading: true,
-        connected: false,
-        isError: false,
-    });
+    const [connection, setConnection] = useState(null);
     const [config, setConfig] = useState({ yandexClientId: '' });
 
     useEffect(() => {
-        API.onConnected(() => {
+        eventsManager.on(IpcEventNamesEnum.CONNECTED, () => {
             logger.debug('[APP] onConnected');
-            setConnection({ loading: false, connected: true, isError: false });
+            setConnection({ connected: true, authorized: true });
         });
 
-        API.onRequireAuth(() => {
+        eventsManager.on(IpcEventNamesEnum.AUTH_REQUIRED, () => {
             logger.debug('[APP] onRequireAuth');
-            setConnection({ loading: false, connected: false, isError: connection.isError });
+            setConnection({ connected: false, authorized: false });
         });
 
-        (() => {
-            API.getConnectionStatus().then((result: any) => {
-                setConnection(result);
-            });
-            API.getConfig().then((result: any) => {
-                setConfig(result);
-            });
-        })();
+        eventsManager.on(IpcEventNamesEnum.AUTH_SUCCESS, () => {
+            setConnection({ ...connection, authorized: true });
+        });
+
+        getConnectionStatus().then((result: any) => {
+            setConnection(result);
+        });
+        getConfig().then((result: any) => {
+            setConfig(result);
+        });
     }, []);
 
+    const isLoading = !connection || (connection.authorized && !connection.connected);
+
     const render = () => {
-        if (!connection.connected) {
-            return <Login />;
-        }
+        if (connection) {
+            if (!connection.authorized) {
+                return <Login />;
+            }
 
-        if (connection.isError) {
-            return "Технические проблемы. Попробуйте позже";
+            return <ConnectedPage />;
         }
-
-        return <ConnectedPage />;
     };
 
     return (
         <ThemeProvider theme={theme}>
             <AppContext.Provider value={{ connection, config, setShowLoader }}>
                 <CssBaseline enableColorScheme />
-                {(showLoader || connection.loading) && (
+                {(showLoader || isLoading) && (
                     <StyledLoaderWrapper>
                         <Loader />
                     </StyledLoaderWrapper>

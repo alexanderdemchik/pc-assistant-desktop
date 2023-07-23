@@ -3,7 +3,6 @@ import winston from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
 import chalk from 'chalk';
-import { getResourcesFolderPath } from './helpers';
 
 export let logger: winston.Logger;
 
@@ -24,26 +23,22 @@ function formatter(isConsole: boolean) {
         winston.format.timestamp(),
         winston.format.printf(
             (info) =>
-                `${info.timestamp} [${chalk.green(info.isRenderer ? 'renderer' : 'main')}][${info.level}]: ${
-                    info.message
-                }`
+                `${info.timestamp} [${chalk.green(info.isRenderer ? 'renderer' : 'main')}]${
+                    info.prefix ? `[${chalk.green(info.prefix)}]` : ''
+                }[${info.level}]: ${info.message}`
         )
     );
 
     return winston.format.combine(...formatters);
 }
 
-export async function initMainLogger(logLevel: string) {
+export function registerLogger(logLevel: string) {
     logger = winston.createLogger({
         level: logLevel ?? 'debug',
         format: winston.format.json(),
         transports: [
             new winston.transports.DailyRotateFile({
-                filename: path.join(
-                    getResourcesFolderPath(),
-                    'logs',
-                    'app-%DATE%.log'
-                ),
+                filename: path.join(app.getPath('userData'), 'logs', 'app-%DATE%.log'),
                 format: formatter(false),
                 datePattern: 'YYYY-MM-DD-HH',
                 maxSize: '20m',

@@ -6,3 +6,10 @@ export const APP_CONFIG_FILE = 'config.json';
 export const YANDEX_CREDENTIALS = {
     REDIRECT_URI: `${APP_PROTOCOL}://`,
 };
+
+export const SERVICE_SOCKET_PORT = 8012;
+
+export enum APP_FLAGS {
+    AUTOLAUNCHED = '--hidden',
+    NO_UI = '--noui',
+}

@@ -3,7 +3,7 @@ import cp from 'child_process';
 export const shutdown = async () => {
   switch (process.platform) {
     case 'win32':
-      return cp.execSync('shutdown /s /t 0');
+      return cp.execSync('shutdown /s /t 1');
     case 'darwin':
       return cp.execSync('shutdown -h now');;
     case 'linux':
@@ -25,7 +25,7 @@ export const sleep = async () => {
 export const restart = async () => {
   switch (process.platform) {
     case 'win32':
-      return cp.execSync('shutdown /r /t 0');
+      return cp.execSync('shutdown /r /t 1');
     case 'darwin':
       return cp.execSync('shutdown -r now');;
     case 'linux':
