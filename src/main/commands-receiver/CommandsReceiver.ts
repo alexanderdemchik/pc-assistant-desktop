@@ -1,4 +1,4 @@
-import { IConfig } from '../config';
+import { Disposable, IConfig } from '../common/types';
 import { Logger } from 'winston';
 
 export interface ICommandsReceiverState {
@@ -6,12 +6,12 @@ export interface ICommandsReceiverState {
   error: Error;
 }
 
-export abstract class CommandsReceiver {
+export abstract class CommandsReceiver implements Disposable {
   protected connected = false;
   protected error: Error = null;
 
   constructor(
-    protected config: IConfig,
+    protected config: IConfig = {},
     protected logger: Logger,
     protected errorHandler: (err: Error) => void,
     protected commandsHandler: (command: string) => void,
@@ -21,4 +21,5 @@ export abstract class CommandsReceiver {
   public abstract init(): Promise<void>;
   public abstract getState(): ICommandsReceiverState;
   public abstract updateConfig(config: IConfig): void;
+  public abstract dispose(): void;
 }

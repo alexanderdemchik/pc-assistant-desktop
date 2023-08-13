@@ -10,7 +10,7 @@
   },
   "main": "./src/main/main.ts",
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build": "concurrently -c \"red,cyan,magenta\" --names \"build:main,build:renderer,build:service\" \"npm run build:main\" \"npm run build:renderer\" \"npm run build:service\" -m 3",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./webpack/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./webpack/webpack.config.renderer.prod.ts",
     "postinstall": "ts-node ./scripts/check-native-dep.js && electron-builder install-app-deps",
@@ -21,6 +21,7 @@
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./webpack/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./webpack/webpack.config.renderer.dev.ts",
+    "build:service": "ts-node ./scripts/build-service.ts",
     "test": "jest"
   },
   "browserslist": [],
@@ -66,6 +67,7 @@
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^5.3.0",
+    "fastest-levenshtein": "^1.0.16",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.2",
@@ -82,6 +84,7 @@
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
+    "@types/firebase": "^3.2.1",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.2.5",
     "@types/react": "^18.2.8",
@@ -89,12 +92,13 @@
     "@types/react-test-renderer": "^18.0.0",
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
+    "@types/webpack-node-externals": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "@types/firebase": "^3.2.1",
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^8.1.0",
+    "copy-webpack-plugin": "^11.0.0",
     "core-js": "^3.30.2",
     "cross-env": "^7.0.3",
     "css-loader": "^6.8.1",
@@ -133,11 +137,12 @@
     "webpack-bundle-analyzer": "^4.9.0",
     "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.15.0",
-    "webpack-merge": "^5.9.0"
+    "webpack-merge": "^5.9.0",
+    "webpack-node-externals": "^3.0.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Voice PC Assistant",
+    "appId": "voice_pc_assistant",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -145,10 +150,17 @@
       "node_modules",
       "package.json"
     ],
-    "protocols": [{
-      "name": "pc-manager",
-      "schemes": ["pc-manager"]
-    }],
+    "nsis": {
+      "include": "scripts/installer.nsh"
+    },
+    "protocols": [
+      {
+        "name": "pc-manager",
+        "schemes": [
+          "pc-manager"
+        ]
+      }
+    ],
     "afterSign": "./scripts/notarize.js",
     "mac": {
       "target": {
@@ -195,16 +207,12 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
-    }
-  },
-  "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
+      "./assets/**",
+      {
+        "from": "./release/service",
+        "to": "./service"
+      }
+    ]
   },
   "devEngines": {
     "node": ">=14.x",

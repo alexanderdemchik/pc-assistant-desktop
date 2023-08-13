@@ -6,6 +6,7 @@ export enum ServiceSocketMessageTypeEnum {
   AUTH_ERROR = 'AUTH_ERROR',
   STATE_CHANGE = 'STATE_CHANGE',
   COMMAND = 'COMMAND',
+  ERROR = 'ERROR',
 }
 
 export abstract class ServiceManager extends EventEmitter implements Disposable {

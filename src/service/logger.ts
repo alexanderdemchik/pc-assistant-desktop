@@ -1,7 +1,6 @@
 import winston from 'winston';
-import chalk from 'chalk';
 
-function formatter(isConsole: boolean) {
+function formatter() {
   const formatters = [];
 
   formatters.push(
@@ -11,14 +10,11 @@ function formatter(isConsole: boolean) {
     })()
   );
 
-  if (isConsole) formatters.push(winston.format.colorize({ level: true }));
-
   formatters.push(
     winston.format.splat(),
     winston.format.timestamp(),
     winston.format.printf(
-      (info) =>
-        `${info.timestamp} ${info.prefix ? `[${chalk.green(info.prefix)}]` : ''}[${info.level}]: ${info.message}`
+      (info) => `${info.timestamp} ${info.prefix ? `[${info.prefix}]` : ''}[${info.level}]: ${info.message}`
     )
   );
 
@@ -30,7 +26,7 @@ export const logger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     new winston.transports.Console({
-      format: formatter(true),
+      format: formatter(),
     }),
   ],
 });

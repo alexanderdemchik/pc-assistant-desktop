@@ -1,8 +1,7 @@
 import { CommandsReceiver } from './CommandsReceiver';
 import serviceManager from '../service-manager';
 import { ServiceSocketMessageTypeEnum } from '../service-manager/ServiceManager';
-import { AuthError } from '../common/types';
-import { IConfig } from '../config';
+import { AuthError, IConfig } from '../common/types';
 
 export class ServiceCommandsReceiver extends CommandsReceiver {
   async init(): Promise<void> {
@@ -18,13 +17,22 @@ export class ServiceCommandsReceiver extends CommandsReceiver {
       this.commandsHandler(payload);
     });
 
+    serviceManager.on(ServiceSocketMessageTypeEnum.ERROR, () => {
+      this.error = new Error();
+      this.errorHandler(this.error);
+    });
+
     try {
       await serviceManager.init();
     } catch (e) {
-      this.logger.debug('Error to init service');
+      this.logger.debug('Error to init service %o', e);
       serviceManager.dispose();
       throw e;
     }
+  }
+
+  public dispose(): void {
+    serviceManager.dispose();
   }
 
   public updateConfig(config: IConfig) {

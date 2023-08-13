@@ -1,0 +1,7 @@
+<service>
+    <id>Voice_PC_Assistant</id>
+    <name>Voice PC Assistant</name>
+    <description>Voice PC Assistant Service</description>
+    <executable>%BASE%\service.exe</executable>
+    <startmode>Automatic</startmode>
+</service>

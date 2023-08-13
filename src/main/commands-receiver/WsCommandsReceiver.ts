@@ -1,7 +1,6 @@
 import { Socket, io } from 'socket.io-client';
 import { CommandsReceiver } from './CommandsReceiver';
-import { AuthError } from '../common/types';
-import { IConfig } from '../config';
+import { AuthError, IConfig } from '../common/types';
 
 export class WsCommandsReceiver extends CommandsReceiver {
   private socketInstance: Socket = null;
@@ -14,7 +13,7 @@ export class WsCommandsReceiver extends CommandsReceiver {
   }
 
   async init(): Promise<void> {
-    this.logger.debug('init', { prefix: WsCommandsReceiver.name });
+    this.logger.debug('init', { prefix: 'WSCommandsReceiver' });
 
     if (!this.config.token) {
       this.error = new AuthError();
@@ -60,12 +59,12 @@ export class WsCommandsReceiver extends CommandsReceiver {
   }
 
   public updateConfig(config: IConfig) {
-    this.logger.debug(`[${WsCommandsReceiver.name}] updateConfig`);
+    this.logger.debug(`[WSCommandsReceiver}] updateConfig`);
 
     if (this.config.token !== config.token) {
       this.config = config;
 
-      this.socketInstance.close();
+      this.socketInstance?.close();
 
       this.init();
     }
@@ -76,5 +75,9 @@ export class WsCommandsReceiver extends CommandsReceiver {
       error: this.error,
       connected: this.connected,
     };
+  }
+
+  public dispose(): void {
+    this.socketInstance?.close();
   }
 }

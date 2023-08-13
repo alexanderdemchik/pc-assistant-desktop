@@ -48,12 +48,8 @@ export function registerStaticProtocol() {
 }
 
 export function registerDeepLinksHandler() {
+  logger.debug(process.env.NODE_ENV);
   if (process.env.NODE_ENV === 'development' && process.platform === 'win32') {
-    // Set the path of electron.exe and your app.
-    // These two additional parameters are only available on windows.
-    // Setting this is required to get this working in dev mode.
-    console.log(process.execPath);
-    console.log([path.resolve(process.argv[1])]);
     app.setAsDefaultProtocolClient(APP_PROTOCOL, process.execPath, [
       '-r',
       path.join(__dirname, '..', '..', 'node_modules', 'ts-node/register/transpile-only'),
@@ -64,15 +60,23 @@ export function registerDeepLinksHandler() {
   }
 
   app.on('open-url', function (event, url) {
-    event.preventDefault();
-    handleAuthWithYandexToken(url);
+    try {
+      event.preventDefault();
+      handleAuthWithYandexToken(url);
+    } catch (e) {
+      logger.error('open-url %e', e);
+    }
   });
 
   app.on('second-instance', (e, argv) => {
     if (process.platform !== 'darwin') {
-      // Find the arg that is our custom protocol url and store it
-      const url = argv.find((arg) => arg.startsWith(APP_PROTOCOL));
-      handleAuthWithYandexToken(url);
+      try {
+        const url = argv.find((arg) => arg.startsWith(APP_PROTOCOL));
+        logger.debug(url);
+        handleAuthWithYandexToken(url);
+      } catch (e) {
+        logger.error('open-url %e', e);
+      }
     }
   });
 }
@@ -87,6 +91,7 @@ export function setupAutolaunch() {
     .isEnabled()
     .then((isEnabled: boolean) => {
       if (isEnabled) {
+        logger.debug(isEnabled);
         return;
       }
       autoLauncher.enable();

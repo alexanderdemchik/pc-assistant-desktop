@@ -20,6 +20,7 @@ node_modules
 
 release/app/dist
 release/build
+release/service
 
 .idea
 npm-debug.log.*
@@ -27,3 +28,4 @@ npm-debug.log.*
 *.sass.d.ts
 *.scss.d.ts
 *.log
+.webpack

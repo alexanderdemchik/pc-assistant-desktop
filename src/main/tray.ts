@@ -3,6 +3,7 @@ import { getResourcesFolderPath } from './helpers';
 import path from 'path';
 import * as windowmanager from './window';
 import { APP_NAME } from '../common/constants';
+import { remoteCommandsReceiver } from './commands-receiver';
 
 export let instance: Tray;
 
@@ -28,9 +29,9 @@ export function create() {
     instance.setContextMenu(contextMenu);
 
     instance.on('click', () => {
-      // if (!ws.isConnected && !ws.isConnecting) {
-      //     windowmanager.create();
-      // }
+      if (!remoteCommandsReceiver.getState().connected && remoteCommandsReceiver.getState().error) {
+        windowmanager.create();
+      }
     });
   }
 }

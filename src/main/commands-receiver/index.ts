@@ -1,3 +1,4 @@
+import { handleCommand } from '../commands-handler';
 import { AuthError } from '../common/types';
 import { config } from '../config';
 import { EventsNamesEnum, eventsManager } from '../events';
@@ -14,8 +15,25 @@ const errorHandler = (err: Error) => {
   }
 };
 
+const serviceErrorHandler = (err: Error) => {
+  if (err instanceof AuthError) {
+    eventsManager.emit(EventsNamesEnum.AUTH_REQUIRED);
+  } else {
+    logger.debug('Service error %o', err);
+    remoteCommandsReceiver.dispose();
+    remoteCommandsReceiver = new WsCommandsReceiver(
+      { ...config },
+      logger,
+      errorHandler,
+      commandsHandler,
+      stateChangeHandler
+    );
+    remoteCommandsReceiver.init();
+  }
+};
+
 const commandsHandler = (command: string) => {
-  console.log(command);
+  handleCommand(command);
 };
 
 const stateChangeHandler = ({ connected }: ICommandsReceiverState) => {
@@ -33,7 +51,7 @@ export async function setupRemoteCommandsReceiver() {
   remoteCommandsReceiver = new ServiceCommandsReceiver(
     config,
     logger,
-    errorHandler,
+    serviceErrorHandler,
     commandsHandler,
     stateChangeHandler
   );
@@ -41,6 +59,7 @@ export async function setupRemoteCommandsReceiver() {
   try {
     await remoteCommandsReceiver.init();
   } catch (error) {
+    remoteCommandsReceiver.dispose();
     remoteCommandsReceiver = new WsCommandsReceiver(
       { ...config },
       logger,

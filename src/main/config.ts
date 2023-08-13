@@ -8,12 +8,7 @@ import defaultProdConfig from '../../config/production.json';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { logger } from './logger';
-
-export interface IConfig {
-  deviceId?: string;
-  token?: string;
-  [key: string]: string;
-}
+import { IConfig } from './common/types';
 
 export let config: IConfig = null;
 

@@ -32,9 +32,9 @@ if (!gotTheLock) {
   app.quit();
 }
 
+registerLogger(process.env.LOG_LEVEL);
 registerSchemesAsPrivileged();
 registerDeepLinksHandler();
-registerLogger(process.env.LOG_LEVEL);
 
 logger.debug(app.getVersion());
 
@@ -52,10 +52,10 @@ async function onReady() {
 
   trayManager.create();
 
-  setupRemoteCommandsReceiver();
   windowManager.setupEventsListeners();
+  setupRemoteCommandsReceiver();
 
-  if (!isAutoLaunched && !authManager.isAuthorized) {
+  if (!isAutoLaunched) {
     windowManager.create();
   }
 }
@@ -68,4 +68,12 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     windowManager.create();
   }
+});
+
+process.on('uncaughtException', (e) => {
+  logger.error('%o', e);
+});
+
+process.on('unhandledRejection', (e) => {
+  logger.error('%o', e);
 });

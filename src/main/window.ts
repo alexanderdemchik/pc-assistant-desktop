@@ -16,12 +16,12 @@ export function setupEventsListeners() {
   });
 
   eventsManager.on(EventsNamesEnum.TOKEN_RECEIVED, () => {
-    this.emit(IpcEventNamesEnum.AUTH_SUCCESS);
+    emit(IpcEventNamesEnum.AUTH_SUCCESS);
     instance?.focus();
   });
 
   eventsManager.on(EventsNamesEnum.CONNECTED, () => {
-    this.emit(IpcEventNamesEnum.CONNECTED);
+    emit(IpcEventNamesEnum.CONNECTED);
   });
 
   ipcMain.handle(IpcEventNamesEnum.GET_CONNECTION_STATUS, () => {
