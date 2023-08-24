@@ -3,34 +3,61 @@ import { EventsNamesEnum, eventsManager } from './events';
 import { IpcEventNamesEnum } from '../common/types/ipcEventsNames.enum';
 import { remoteCommandsReceiver } from './commands-receiver';
 import { config } from './config';
-import { isAuthorized } from './auth-manager';
+import { isAuthorized, isLoading } from './auth-manager';
 import { resolveHtmlPath } from './util';
 import path from 'path';
+import { IConnectionState } from '../common/types/IConnectionState';
+import { logger } from './logger';
+import * as cacheManager from './cache-manager';
 
 export let instance: BrowserWindow;
+
+export function notifyStateChange() {
+  const { connected } = remoteCommandsReceiver.getState();
+  const state: IConnectionState = { connected, authorized: isAuthorized, loading: isLoading };
+
+  logger.debug('notifyStateChange: %o', state);
+
+  emit(IpcEventNamesEnum.STATE_CHANGE, state);
+}
 
 export function setupEventsListeners() {
   eventsManager.on(EventsNamesEnum.AUTH_REQUIRED, async () => {
     await create();
-    emit(IpcEventNamesEnum.AUTH_REQUIRED);
+    notifyStateChange();
   });
 
   eventsManager.on(EventsNamesEnum.TOKEN_RECEIVED, () => {
-    emit(IpcEventNamesEnum.AUTH_SUCCESS);
+    notifyStateChange();
     instance?.focus();
   });
 
-  eventsManager.on(EventsNamesEnum.CONNECTED, () => {
-    emit(IpcEventNamesEnum.CONNECTED);
+  eventsManager.on(EventsNamesEnum.REMOTE_COMMANDS_RECEIVER_STATE_CHANGE, () => {
+    notifyStateChange();
+  });
+
+  eventsManager.on(EventsNamesEnum.DISCONNECTED, () => {
+    notifyStateChange();
+  });
+
+  ipcMain.handle(IpcEventNamesEnum.GET_COMMANDS_LOG, () => {
+    return cacheManager.get('commandsLog');
   });
 
   ipcMain.handle(IpcEventNamesEnum.GET_CONNECTION_STATUS, () => {
     const { connected } = remoteCommandsReceiver.getState();
-    return { connected: connected, authorized: isAuthorized };
+    return { connected: connected, authorized: isAuthorized, loading: isLoading } as IConnectionState;
   });
 
   ipcMain.handle(IpcEventNamesEnum.GET_CONFIG, () => {
     return config;
+  });
+
+  ipcMain.handle(IpcEventNamesEnum.GET_APP_INFO, () => {
+    return {
+      version: app.getVersion(),
+      name: app.getName(),
+    };
   });
 }
 

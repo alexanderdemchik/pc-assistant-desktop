@@ -21,11 +21,15 @@ switch (arg) {
     if (fs.existsSync(SERVICE_FOLDER_PATH)) {
       let shouldUpdateService = false;
       try {
+        console.log('check version...');
         const { version: oldVersion } = JSON.parse(
           fs.readFileSync(path.join(SERVICE_FOLDER_PATH, 'version.json')).toString()
         );
 
+        console.log(oldVersion);
+
         if (oldVersion !== version) {
+          console.log(`service will be updated from ${oldVersion} to ${version}`);
           shouldUpdateService = true;
         }
       } catch (e) {
@@ -33,27 +37,44 @@ switch (arg) {
       }
 
       if (shouldUpdateService) {
-        cp.execSync(`${SERVICE_EXE} stop && ${SERVICE_EXE} uninstall`, { cwd: SERVICE_FOLDER_PATH });
+        console.log('uninstall service');
+        try {
+          cp.execSync(`${SERVICE_EXE} stop && ${SERVICE_EXE} uninstall`, { cwd: SERVICE_FOLDER_PATH });
+        } catch (e) {
+          console.log('');
+        }
+
+        console.log('remove service folder');
         fs.rmSync(SERVICE_FOLDER_PATH, { force: true, recursive: true });
       } else {
         break;
       }
     }
 
+    console.log('make service dir');
     fs.mkdirSync(SERVICE_FOLDER_PATH);
 
+    console.log('copy service exe');
     fs.copyFileSync(path.join(SERVICE_INSTALLER_EXE_FOLDER, SERVICE_EXE), path.join(SERVICE_FOLDER_PATH, SERVICE_EXE));
+
     fs.copyFileSync(
       path.join(SERVICE_INSTALLER_EXE_FOLDER, 'service.exe'),
       path.join(SERVICE_FOLDER_PATH, 'service.exe')
     );
+
+    console.log('copy service xml');
     fs.copyFileSync(path.join(SERVICE_INSTALLER_EXE_FOLDER, SERVICE_XML), path.join(SERVICE_FOLDER_PATH, SERVICE_XML));
+
+    console.log('copy version file');
     fs.copyFileSync(
       path.join(SERVICE_INSTALLER_EXE_FOLDER, 'version.json'),
       path.join(SERVICE_FOLDER_PATH, 'version.json')
     );
 
+    console.log('installing service...');
     cp.execSync(`${SERVICE_EXE} install && ${SERVICE_EXE} start`, { cwd: SERVICE_FOLDER_PATH });
+
+    console.log('success!');
     break;
   case ARGS.UNINSTALL:
     cp.execSync(`${SERVICE_EXE} stop && ${SERVICE_EXE} uninstall`, { cwd: SERVICE_FOLDER_PATH });

@@ -3,7 +3,7 @@ import { AuthError } from '../common/types';
 import { config } from '../config';
 import { EventsNamesEnum, eventsManager } from '../events';
 import { logger } from '../logger';
-import { CommandsReceiver, ICommandsReceiverState } from './CommandsReceiver';
+import { CommandsReceiver } from './CommandsReceiver';
 import { ServiceCommandsReceiver } from './ServiceCommandsReceiver';
 import { WsCommandsReceiver } from './WsCommandsReceiver';
 
@@ -36,12 +36,8 @@ const commandsHandler = (command: string) => {
   handleCommand(command);
 };
 
-const stateChangeHandler = ({ connected }: ICommandsReceiverState) => {
-  if (connected) {
-    eventsManager.emit(EventsNamesEnum.CONNECTED);
-  } else {
-    eventsManager.emit(EventsNamesEnum.DISCONNECTED);
-  }
+const stateChangeHandler = () => {
+  eventsManager.emit(EventsNamesEnum.REMOTE_COMMANDS_RECEIVER_STATE_CHANGE);
 };
 
 export async function setupRemoteCommandsReceiver() {
@@ -70,4 +66,6 @@ export async function setupRemoteCommandsReceiver() {
 
     remoteCommandsReceiver.init();
   }
+
+  stateChangeHandler();
 }

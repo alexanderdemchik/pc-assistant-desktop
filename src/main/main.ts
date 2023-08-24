@@ -1,4 +1,5 @@
 process.env.FORCE_COLOR = 'true'; // required for chalk to work
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 import { app, BrowserWindow } from 'electron';
 import { APP_FLAGS } from '../common/constants';
@@ -69,6 +70,9 @@ app.on('activate', () => {
     windowManager.create();
   }
 });
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+app.on('window-all-closed', () => {});
 
 process.on('uncaughtException', (e) => {
   logger.error('%o', e);

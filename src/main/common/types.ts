@@ -6,5 +6,6 @@ export interface Disposable {
 export interface IConfig {
   deviceId?: string;
   token?: string;
+  yandexClientId?: string;
   [key: string]: string;
 }

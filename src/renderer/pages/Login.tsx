@@ -1,6 +1,5 @@
 import { useContext, useEffect } from 'react';
 import { Paper, styled } from '@mui/material';
-import { YANDEX_CREDENTIALS } from '../../common/constants';
 import AppContext from '../AppContext';
 
 const StyledLoginPage = styled('div')({
@@ -15,13 +14,14 @@ function Login(): JSX.Element {
   useEffect(() => {
     setShowLoader(true);
     if (config.yandexClientId) {
+      const redirectUrl = config.serverUrl + '/callback';
       window.YaAuthSuggest.init(
         {
           client_id: config.yandexClientId,
           response_type: 'token',
-          redirect_uri: YANDEX_CREDENTIALS.REDIRECT_URI,
+          redirect_uri: redirectUrl,
         },
-        YANDEX_CREDENTIALS.REDIRECT_URI,
+        redirectUrl,
         {
           view: 'button',
           parentId: 'login-container',

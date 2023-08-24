@@ -3,7 +3,7 @@ import { getResourcesFolderPath } from './helpers';
 import path from 'path';
 import * as windowmanager from './window';
 import { APP_NAME } from '../common/constants';
-import { remoteCommandsReceiver } from './commands-receiver';
+import { changeUser } from './auth-manager';
 
 export let instance: Tray;
 
@@ -14,6 +14,7 @@ export function create() {
       {
         label: 'Сменить пользователя',
         click: () => {
+          changeUser();
           // ws.destroy();
           windowmanager.create();
         },
@@ -29,9 +30,7 @@ export function create() {
     instance.setContextMenu(contextMenu);
 
     instance.on('click', () => {
-      if (!remoteCommandsReceiver.getState().connected && remoteCommandsReceiver.getState().error) {
-        windowmanager.create();
-      }
+      windowmanager.create();
     });
   }
 }

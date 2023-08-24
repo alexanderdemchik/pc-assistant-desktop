@@ -1,28 +1,35 @@
 import { CommandsReceiver } from './CommandsReceiver';
 import serviceManager from '../service-manager';
-import { ServiceSocketMessageTypeEnum } from '../service-manager/ServiceManager';
+import { ServiceMessageStateChange, ServiceMessageTypeEnum } from '../service-manager/ServiceManager';
 import { AuthError, IConfig } from '../common/types';
 
 export class ServiceCommandsReceiver extends CommandsReceiver {
+  serviceMessageHandler = (type: ServiceMessageTypeEnum, payload: unknown) => {
+    this.logger.debug('serviceMessageHandler');
+    switch (type) {
+      case ServiceMessageTypeEnum.AUTH_ERROR:
+        this.error = new AuthError();
+        this.errorHandler(new AuthError());
+        break;
+      case ServiceMessageTypeEnum.COMMAND:
+        this.commandsHandler(payload as string);
+
+        break;
+      case ServiceMessageTypeEnum.ERROR:
+        this.error = new Error();
+        this.errorHandler(this.error);
+        break;
+      case ServiceMessageTypeEnum.STATE_CHANGE:
+        this.connected = (payload as ServiceMessageStateChange).connected;
+
+        this.stateChangeHandler({ connected: this.connected });
+        break;
+    }
+  };
+
   async init(): Promise<void> {
-    serviceManager.on(ServiceSocketMessageTypeEnum.AUTH_ERROR, () => {
-      this.errorHandler(new AuthError());
-    });
-
-    serviceManager.on(ServiceSocketMessageTypeEnum.STATE_CHANGE, ({ payload }) => {
-      this.stateChangeHandler(payload);
-    });
-
-    serviceManager.on(ServiceSocketMessageTypeEnum.COMMAND, ({ payload }) => {
-      this.commandsHandler(payload);
-    });
-
-    serviceManager.on(ServiceSocketMessageTypeEnum.ERROR, () => {
-      this.error = new Error();
-      this.errorHandler(this.error);
-    });
-
     try {
+      serviceManager.subscribe(this.serviceMessageHandler);
       await serviceManager.init();
     } catch (e) {
       this.logger.debug('Error to init service %o', e);
@@ -36,7 +43,7 @@ export class ServiceCommandsReceiver extends CommandsReceiver {
   }
 
   public updateConfig(config: IConfig) {
-    serviceManager.emit(ServiceSocketMessageTypeEnum.CONFIG, config);
+    serviceManager.sendMessage(ServiceMessageTypeEnum.CONFIG, config);
   }
 
   public getState() {

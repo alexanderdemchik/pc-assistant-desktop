@@ -1,5 +1,5 @@
 import { SERVICE_SOCKET_PORT } from '../../common/constants';
-import { ServiceManager, ServiceSocketMessageTypeEnum } from './ServiceManager';
+import { ServiceManager, ServiceMessageTypeEnum } from './ServiceManager';
 import net from 'net';
 import sudo from '@vscode/sudo-prompt';
 import { getResourcesFolderPath } from '../helpers';
@@ -14,15 +14,19 @@ export class WinServiceManager extends ServiceManager {
   private client: net.Socket;
   async init() {
     await waitFor(() => this.establishSocketServiceConnection());
+  }
 
-    this.on(ServiceSocketMessageTypeEnum.CONFIG, (config) => {
-      this.client.write(
-        JSON.stringify({
-          type: ServiceSocketMessageTypeEnum.CONFIG,
-          payload: config,
-        })
-      );
-    });
+  sendMessage(type: ServiceMessageTypeEnum, payload?: object): void {
+    this.client.write(
+      JSON.stringify({
+        type,
+        payload,
+      })
+    );
+  }
+
+  emit(type: ServiceMessageTypeEnum, payload?: unknown) {
+    this.messageHandlers.forEach((handler) => handler(type, payload));
   }
 
   private async establishSocketServiceConnection() {
@@ -41,18 +45,18 @@ export class WinServiceManager extends ServiceManager {
 
           logger.debug('Received data from service %o', parsedData, { prefix: WinServiceManager.name.toString() });
 
-          this.emit(parsedData.type, parsedData);
+          this.emit(parsedData.type, parsedData.payload);
         });
 
         this.client.on('error', (e) => {
           logger.error('Service error: %o', e);
-          this.emit(ServiceSocketMessageTypeEnum.ERROR);
+          this.emit(ServiceMessageTypeEnum.ERROR);
         });
 
         this.client.removeListener('error', errorListener);
         this.client.write(
           JSON.stringify({
-            type: ServiceSocketMessageTypeEnum.CONFIG,
+            type: ServiceMessageTypeEnum.CONFIG,
             payload: config,
           })
         );
@@ -83,9 +87,9 @@ export class WinServiceManager extends ServiceManager {
   }
 
   dispose() {
+    this.messageHandlers = [];
     if (this.client) {
       this.client.destroy();
     }
-    this.removeAllListeners();
   }
 }

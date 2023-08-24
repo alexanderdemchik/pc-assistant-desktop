@@ -48,7 +48,6 @@ export function registerStaticProtocol() {
 }
 
 export function registerDeepLinksHandler() {
-  logger.debug(process.env.NODE_ENV);
   if (process.env.NODE_ENV === 'development' && process.platform === 'win32') {
     app.setAsDefaultProtocolClient(APP_PROTOCOL, process.execPath, [
       '-r',
@@ -72,7 +71,6 @@ export function registerDeepLinksHandler() {
     if (process.platform !== 'darwin') {
       try {
         const url = argv.find((arg) => arg.startsWith(APP_PROTOCOL));
-        logger.debug(url);
         handleAuthWithYandexToken(url);
       } catch (e) {
         logger.error('open-url %e', e);

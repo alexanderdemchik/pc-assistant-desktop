@@ -1,7 +1,7 @@
 {
   "name": "voice-pc-assistant",
   "productName": "Voice PC Assistant",
-  "version": "1.0.1",
+  "version": "dev-1.0.0",
   "description": "Voice PC Assistant",
   "license": "MIT",
   "author": {
@@ -59,6 +59,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.3",
+    "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.1",
     "@vscode/sudo-prompt": "^9.3.1",
     "auto-launch": "^5.0.6",

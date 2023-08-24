@@ -5,9 +5,13 @@ import Loader from './components/Loader';
 import { theme } from './theme';
 import ConnectedPage from './pages/Connected';
 import { IpcEventNamesEnum } from '../common/types/ipcEventsNames.enum';
-import { eventsManager, getConfig, getConnectionStatus } from './api';
+import { eventsManager, getAppInfo, getCommandsLog, getConfig, getConnectionStatus } from './api';
 import AppContext from './AppContext';
 import Login from './pages/Login';
+import { IConnectionState } from '../common/types/IConnectionState';
+import { IConfig } from '../main/common/types';
+import { IAppInfo } from '../common/types/IAppInfo';
+import { ICacheCommandLogEntry } from '../main/cache-manager/types';
 
 const StyledLoaderWrapper = styled('div')(({ theme }) => ({
   position: 'absolute',
@@ -23,33 +27,37 @@ const StyledLoaderWrapper = styled('div')(({ theme }) => ({
 
 function App(): JSX.Element {
   const [showLoader, setShowLoader] = useState(false);
-  const [connection, setConnection] = useState(null);
-  const [config, setConfig] = useState({ yandexClientId: '' });
+  const [connection, setConnection] = useState<IConnectionState>(null);
+  const [config, setConfig] = useState({ yandexClientId: '' } as IConfig);
+  const [appInfo, setAppInfo] = useState<IAppInfo>({ version: '', name: '' });
+  const [commandsLog, setCommandsLog] = useState<ICacheCommandLogEntry[]>([]);
 
   useEffect(() => {
-    eventsManager.on(IpcEventNamesEnum.CONNECTED, () => {
+    eventsManager.on(IpcEventNamesEnum.STATE_CHANGE, (e, data: IConnectionState) => {
       logger.debug('[APP] onConnected');
-      setConnection({ connected: true, authorized: true });
+      setConnection(data);
     });
 
-    eventsManager.on(IpcEventNamesEnum.AUTH_REQUIRED, () => {
-      logger.debug('[APP] onRequireAuth');
-      setConnection({ connected: false, authorized: false });
-    });
-
-    eventsManager.on(IpcEventNamesEnum.AUTH_SUCCESS, () => {
-      setConnection({ ...connection, authorized: true });
+    eventsManager.on(IpcEventNamesEnum.COMMANDS_LOG_CHANGE, (e, data: ICacheCommandLogEntry[]) => {
+      setCommandsLog(data);
     });
 
     getConnectionStatus().then((result: any) => {
       setConnection(result);
     });
-    getConfig().then((result: any) => {
+
+    getConfig().then((result: IConfig) => {
       setConfig(result);
     });
+
+    getAppInfo().then((result: IAppInfo) => {
+      setAppInfo(result);
+    });
+
+    getCommandsLog().then((result: ICacheCommandLogEntry[]) => setCommandsLog(result));
   }, []);
 
-  const isLoading = !connection || (connection.authorized && !connection.connected);
+  const isLoading = connection?.loading;
 
   const render = () => {
     if (connection) {
@@ -63,7 +71,7 @@ function App(): JSX.Element {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppContext.Provider value={{ connection, config, setShowLoader }}>
+      <AppContext.Provider value={{ connection, config, appInfo, setShowLoader, commandsLog }}>
         <CssBaseline enableColorScheme />
         {(showLoader || isLoading) && (
           <StyledLoaderWrapper>

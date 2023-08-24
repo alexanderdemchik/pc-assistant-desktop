@@ -27,6 +27,8 @@ export class WsCommandsReceiver extends CommandsReceiver {
         token: this.config.token,
       },
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 3000,
     }).connect();
 
     this.socketInstance.on('disconnect', () => {
@@ -46,7 +48,6 @@ export class WsCommandsReceiver extends CommandsReceiver {
         this.error = new AuthError();
         this.errorHandler(this.error);
       } else {
-        this.error = e;
         this.errorHandler(e);
       }
     });
@@ -67,6 +68,10 @@ export class WsCommandsReceiver extends CommandsReceiver {
       this.socketInstance?.close();
 
       this.init();
+    } else {
+      if (this.error instanceof AuthError) {
+        this.errorHandler(this.error);
+      }
     }
   }
 

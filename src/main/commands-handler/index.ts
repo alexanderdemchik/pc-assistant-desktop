@@ -3,12 +3,18 @@ import { restart } from './restart';
 import { shutdown } from './shutdown';
 import { sleep } from './sleep';
 import { logger } from '../logger';
+import * as cacheManager from '../cache-manager';
+import * as windowManager from '../window';
+import { IpcEventNamesEnum } from '../../common/types/ipcEventsNames.enum';
+import { ICacheCommandLogEntry } from '../cache-manager/types';
 
 enum DefaultCommandsEnum {
   SLEEP = 'SLEEP',
   SHUTDOWN = 'SHUTDOWN',
   RESTART = 'RESTART',
 }
+
+const COMMAND_DISTANCE_ACCEPT_VALUE = 10;
 
 const defaultCommandsList = [
   {
@@ -28,6 +34,20 @@ const defaultCommandsList = [
   },
 ];
 
+async function addCommandToLog(command: string, executed: boolean) {
+  const newLogEntry: ICacheCommandLogEntry = {
+    datetime: new Date(),
+    command,
+    executed,
+  };
+
+  const newCommandLog = [...(await cacheManager.get('commandsLog')), newLogEntry];
+
+  windowManager.emit(IpcEventNamesEnum.COMMANDS_LOG_CHANGE, newCommandLog);
+
+  return await cacheManager.set('commandsLog', newCommandLog);
+}
+
 export function handleCommand(command: string) {
   logger.debug('handle command %s', command);
   let minDistance = Number.MAX_VALUE;
@@ -42,5 +62,11 @@ export function handleCommand(command: string) {
     }
   }
 
-  minDistanceEntry.handler();
+  if (minDistance < COMMAND_DISTANCE_ACCEPT_VALUE) {
+    minDistanceEntry.handler();
+
+    addCommandToLog(command, true);
+  } else {
+    addCommandToLog(command, false);
+  }
 }

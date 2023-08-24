@@ -3,7 +3,7 @@ import { Logger } from 'winston';
 
 export interface ICommandsReceiverState {
   connected: boolean;
-  error: Error;
+  error?: Error;
 }
 
 export abstract class CommandsReceiver implements Disposable {
