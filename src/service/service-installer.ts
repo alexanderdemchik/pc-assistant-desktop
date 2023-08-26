@@ -41,7 +41,7 @@ switch (arg) {
         try {
           cp.execSync(`${SERVICE_EXE} stop && ${SERVICE_EXE} uninstall`, { cwd: SERVICE_FOLDER_PATH });
         } catch (e) {
-          console.log('');
+          // ignore
         }
 
         console.log('remove service folder');
