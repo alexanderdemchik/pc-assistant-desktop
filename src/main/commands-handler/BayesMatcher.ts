@@ -6,11 +6,7 @@ export async function train() {
   const defaultCommandsTokensMap = {
     [DefaultCommandsEnum.SHUTDOWN]: ['выключи', 'выключи компьютер'],
     [DefaultCommandsEnum.RESTART]: ['перезагрузи', 'рестарт'],
-    [DefaultCommandsEnum.SLEEP]: [
-      ...PorterStemmerRu.tokenizeAndStem('переведи в спящий режим'),
-      ...PorterStemmerRu.tokenizeAndStem('сон'),
-    ],
-    [DefaultCommandsEnum.NONE]: ['заглушка', 'все', 'что', 'не', 'относится', 'к', 'делу'],
+    [DefaultCommandsEnum.SLEEP]: [PorterStemmerRu.tokenizeAndStem('переведи в спящий режим'), 'спящий', 'сон'],
   };
 
   const classifier = new BayesClassifier(PorterStemmerRu);
@@ -31,8 +27,9 @@ const classifier = BayesClassifier.restore(ru_classifier as unknown as BayesClas
 
 export class BayesMatcher implements IMatcher {
   match(command: string): string {
-    console.log(classifier.classify(command));
+    console.log(classifier.getClassifications(command));
     return null;
   }
 }
 
+new BayesMatcher().match('переведи в спящий режим');
