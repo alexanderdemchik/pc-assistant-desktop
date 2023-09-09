@@ -1,0 +1,308 @@
+{
+  "settings": {
+    "languages": [
+      "ru"
+    ],
+    "forceNER": true,
+    "tag": "nlp",
+    "threshold": 0.5,
+    "autoLoad": true,
+    "autoSave": true,
+    "modelFileName": "model.nlp",
+    "executeActionsBeforeAnswers": false,
+    "calculateSentiment": true
+  },
+  "nluManager": {
+    "settings": {
+      "tag": "nlu-manager"
+    },
+    "locales": [
+      "ru"
+    ],
+    "languageNames": {},
+    "domainManagers": {
+      "ru": {
+        "settings": {
+          "locale": "ru",
+          "trainByDomain": false,
+          "tag": "domain-manager-ru",
+          "nluByDomain": {
+            "default": {
+              "className": "NeuralNlu",
+              "settings": {}
+            }
+          },
+          "useStemDict": true
+        },
+        "stemDict": {
+          "выключ": {
+            "intent": "SHUTDOWN",
+            "domain": "default"
+          },
+          "выключ,компьютер": {
+            "intent": "SHUTDOWN",
+            "domain": "default"
+          },
+          "перезагруз": {
+            "intent": "RESTART",
+            "domain": "default"
+          },
+          "рестарт": {
+            "intent": "RESTART",
+            "domain": "default"
+          },
+          "в,перевед,реж,спящ": {
+            "intent": "SLEEP",
+            "domain": "default"
+          },
+          "спящ": {
+            "intent": "SLEEP",
+            "domain": "default"
+          },
+          "сон": {
+            "intent": "SLEEP",
+            "domain": "default"
+          }
+        },
+        "intentDict": {
+          "SHUTDOWN": "default",
+          "RESTART": "default",
+          "SLEEP": "default"
+        },
+        "sentences": [
+          {
+            "domain": "default",
+            "utterance": "выключи",
+            "intent": "SHUTDOWN"
+          },
+          {
+            "domain": "default",
+            "utterance": "выключи компьютер",
+            "intent": "SHUTDOWN"
+          },
+          {
+            "domain": "default",
+            "utterance": "перезагрузи",
+            "intent": "RESTART"
+          },
+          {
+            "domain": "default",
+            "utterance": "рестарт",
+            "intent": "RESTART"
+          },
+          {
+            "domain": "default",
+            "utterance": "переведи в спящий режим",
+            "intent": "SLEEP"
+          },
+          {
+            "domain": "default",
+            "utterance": "спящий",
+            "intent": "SLEEP"
+          },
+          {
+            "domain": "default",
+            "utterance": "сон",
+            "intent": "SLEEP"
+          }
+        ],
+        "domains": {
+          "master_domain": {
+            "settings": {
+              "locale": "ru",
+              "tag": "nlu-ru",
+              "keepStopwords": true,
+              "nonefeatureValue": 1,
+              "nonedeltaMultiplier": 1.2,
+              "spellCheck": false,
+              "spellCheckDistance": 1,
+              "filterZeros": true,
+              "log": true
+            },
+            "features": {
+              "выключ": 1,
+              "компьютер": 1,
+              "перезагруз": 1,
+              "рестарт": 1,
+              "перевед": 1,
+              "в": 1,
+              "спящ": 1,
+              "реж": 1,
+              "сон": 1
+            },
+            "intents": {
+              "SHUTDOWN": 1,
+              "RESTART": 1,
+              "SLEEP": 1
+            },
+            "intentFeatures": {
+              "SHUTDOWN": {
+                "выключ": 1,
+                "компьютер": 1
+              },
+              "RESTART": {
+                "перезагруз": 1,
+                "рестарт": 1
+              },
+              "SLEEP": {
+                "перевед": 1,
+                "в": 1,
+                "спящ": 1,
+                "реж": 1,
+                "сон": 1
+              }
+            },
+            "featuresToIntent": {
+              "выключ": [
+                "SHUTDOWN"
+              ],
+              "компьютер": [
+                "SHUTDOWN"
+              ],
+              "перезагруз": [
+                "RESTART"
+              ],
+              "рестарт": [
+                "RESTART"
+              ],
+              "перевед": [
+                "SLEEP"
+              ],
+              "в": [
+                "SLEEP"
+              ],
+              "спящ": [
+                "SLEEP"
+              ],
+              "реж": [
+                "SLEEP"
+              ],
+              "сон": [
+                "SLEEP"
+              ]
+            },
+            "neuralNetwork": {
+              "settings": {
+                "locale": "ru",
+                "tag": "nlu-ru",
+                "keepStopwords": true,
+                "nonefeatureValue": 1,
+                "nonedeltaMultiplier": 1.2,
+                "spellCheck": false,
+                "spellCheckDistance": 1,
+                "filterZeros": true,
+                "log": true
+              },
+              "features": [
+                "выключ",
+                "компьютер",
+                "перезагруз",
+                "рестарт",
+                "перевед",
+                "в",
+                "спящ",
+                "реж",
+                "сон"
+              ],
+              "intents": [
+                "SHUTDOWN",
+                "RESTART",
+                "SLEEP"
+              ],
+              "perceptrons": [
+                [
+                  11.927963256835938,
+                  0.5543983578681946,
+                  -1.9816926717758179,
+                  -1.9798866510391235,
+                  -0.39943942427635193,
+                  -0.39943942427635193,
+                  -1.9787989854812622,
+                  -0.39943942427635193,
+                  -1.9762134552001953,
+                  2.0002587843952413
+                ],
+                [
+                  -4.072873592376709,
+                  -1.0249836444854736,
+                  10.194190979003906,
+                  10.19222640991211,
+                  -0.6940051317214966,
+                  -0.6940051317214966,
+                  -4.076942443847656,
+                  -0.6940051317214966,
+                  -4.073616027832031,
+                  4.081505908996157
+                ],
+                [
+                  -4.066463947296143,
+                  -1.052225947380066,
+                  -4.061634540557861,
+                  -4.0585455894470215,
+                  0.030019808560609818,
+                  0.030019808560609818,
+                  10.141139030456543,
+                  0.030019808560609818,
+                  10.202351570129395,
+                  4.078207266598462
+                ]
+              ]
+            }
+          }
+        }
+      }
+    },
+    "intentDomains": {},
+    "extraSentences": [
+      [
+        "ru",
+        "выключи"
+      ],
+      [
+        "ru",
+        "выключи компьютер"
+      ],
+      [
+        "ru",
+        "перезагрузи"
+      ],
+      [
+        "ru",
+        "рестарт"
+      ],
+      [
+        "ru",
+        "переведи в спящий режим"
+      ],
+      [
+        "ru",
+        "спящий"
+      ],
+      [
+        "ru",
+        "сон"
+      ]
+    ]
+  },
+  "ner": {
+    "settings": {
+      "tag": "ner",
+      "entityPreffix": "%",
+      "entitySuffix": "%"
+    },
+    "rules": {}
+  },
+  "nlgManager": {
+    "settings": {
+      "tag": "nlg-manager"
+    },
+    "responses": {}
+  },
+  "actionManager": {
+    "settings": {
+      "tag": "action-manager"
+    },
+    "actions": {}
+  },
+  "slotManager": {}
+}

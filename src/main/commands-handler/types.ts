@@ -1,10 +1,11 @@
 export interface IMatcher {
-  match(command: string): string;
+  match(command: string): Promise<string>;
 }
 
 export enum DefaultCommandsEnum {
   SLEEP = 'SLEEP',
   SHUTDOWN = 'SHUTDOWN',
   RESTART = 'RESTART',
-  NONE = 'NONE',
+  MOUSE_MOVE = 'MOUSE_MOVE',
+  MOUSE_CLICK = 'MOUSE_CLICK',
 }

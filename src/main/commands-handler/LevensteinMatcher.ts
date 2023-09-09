@@ -8,7 +8,7 @@ const commandsMatchersMap = {
 };
 
 export class LevensteinMatcher implements IMatcher {
-  match(command: string): string {
+  async match(command: string): Promise<string> {
     let minDistance = Number.MAX_VALUE;
     let minDistanceCommand: string;
 

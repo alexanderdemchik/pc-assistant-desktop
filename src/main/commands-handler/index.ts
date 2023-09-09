@@ -6,8 +6,8 @@ import * as cacheManager from '../cache-manager';
 import * as windowManager from '../window';
 import { IpcEventNamesEnum } from '../../common/types/ipcEventsNames.enum';
 import { ICacheCommandLogEntry } from '../cache-manager/types';
-import { LevensteinMatcher } from './LevensteinMatcher';
 import { DefaultCommandsEnum } from './types';
+import { NlpMatcher } from './NlpMatcher';
 
 export const defaultCommandsHandlers = [
   {
@@ -38,12 +38,12 @@ async function addCommandToLog(command: string, executed: boolean) {
   return await cacheManager.set('commandsLog', newCommandLog);
 }
 
-const matcher = new LevensteinMatcher();
+const matcher = new NlpMatcher();
 
-export function handleCommand(command: string) {
+export async function handleCommand(command: string) {
   logger.debug('handle command %s', command);
 
-  const matchedCommand = matcher.match(command);
+  const matchedCommand = await matcher.match(command);
 
   if (matchedCommand) {
     defaultCommandsHandlers.find(({ name }) => name === matchedCommand).handler();
