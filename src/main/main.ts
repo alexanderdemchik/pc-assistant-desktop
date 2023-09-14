@@ -16,6 +16,7 @@ import * as trayManager from './tray';
 import * as windowManager from './window';
 import { setupRemoteCommandsReceiver } from './commands-receiver';
 import * as authManager from './auth-manager';
+import * as desktopSharingService from './desktop-sharing-service';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const isWithoutUI = process.argv.includes(APP_FLAGS.NO_UI);
@@ -59,6 +60,8 @@ async function onReady() {
   if (!isAutoLaunched) {
     windowManager.create();
   }
+
+  desktopSharingService.init();
 }
 
 app.on('ready', onReady);

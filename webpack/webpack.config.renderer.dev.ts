@@ -158,6 +158,12 @@ const configuration: webpack.Configuration = {
         .on('close', (code: number) => process.exit(code!))
         .on('error', (spawnError) => console.error(spawnError));
 
+      console.log('Starting desktop-sharing.js builder...');
+      const dsProcess = spawn('npm', ['run', 'build:desktop-sharing'], {
+        shell: true,
+        stdio: 'inherit',
+      }).on('error', (spawnError) => console.error(spawnError));
+
       console.log('Starting Main Process...');
       let args = ['run', 'start:main'];
       if (process.env.MAIN_ARGS) {
@@ -169,6 +175,7 @@ const configuration: webpack.Configuration = {
       })
         .on('close', (code: number) => {
           preloadProcess.kill();
+          dsProcess.kill();
           process.exit(code!);
         })
         .on('error', (spawnError) => console.error(spawnError));

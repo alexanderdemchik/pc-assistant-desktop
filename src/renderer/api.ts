@@ -28,3 +28,7 @@ export const getAppInfo = (): Promise<IAppInfo> => {
 export const getCommandsLog = (): Promise<ICacheCommandLogEntry[]> => {
   return window.ipcRenderer.invoke(IpcEventNamesEnum.GET_COMMANDS_LOG);
 };
+
+export const getSources = (): Promise<string[]> => {
+  return window.ipcRenderer.invoke(IpcEventNamesEnum.GET_SOURCES);
+};

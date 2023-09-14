@@ -55,9 +55,10 @@ export function registerLogger(logLevel: string) {
     );
   }
 
+  const rendererLogger = logger.child({ isRenderer: true });
   ipcMain.on('log', (event, level: 'info' | 'error' | 'debug', ...args) => {
     // @ts-ignore
-    logger[level](args, { isRenderer: 1 });
+    rendererLogger[level](...args);
   });
 
   return logger;

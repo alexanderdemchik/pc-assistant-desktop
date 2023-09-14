@@ -10,3 +10,10 @@ export function resolveHtmlPath(htmlFileName: string) {
   }
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
+
+export function resolveDesktopSharingPath() {
+  if (process.env.NODE_ENV === 'development') {
+    return `file://${path.resolve(__dirname, '../../release/app/dist/renderer/desktop-sharing.html')}`;
+  }
+  return `file://${path.resolve(__dirname, '../renderer/desktop-sharing.html')}`;
+}

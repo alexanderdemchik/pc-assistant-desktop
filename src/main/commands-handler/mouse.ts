@@ -38,5 +38,3 @@ export async function click(button: MouseButton, double = false) {
     await mouse.click(button);
   }
 }
-
-click(Button.LEFT);
