@@ -1,4 +1,5 @@
-import { Disposable } from '../common/types';
+import { Disposable } from '../../main/common/types';
+import { ServiceClientIdEnum } from './types';
 
 export enum ServiceMessageTypeEnum {
   CONFIG = 'CONFIG',
@@ -6,13 +7,14 @@ export enum ServiceMessageTypeEnum {
   STATE_CHANGE = 'STATE_CHANGE',
   COMMAND = 'COMMAND',
   ERROR = 'ERROR',
+  SET_CLIENT_ID = 'SET_CLIENT_ID',
 }
 
 export interface ServiceMessageStateChange {
   connected: boolean;
 }
 
-type ServiceMessageHandler = (type: ServiceMessageTypeEnum, payload?: unknown) => void;
+type ServiceMessageHandler = (type: unknown, payload?: unknown) => void;
 
 export abstract class ServiceManager implements Disposable {
   protected messageHandlers: Array<ServiceMessageHandler> = [];
@@ -24,7 +26,7 @@ export abstract class ServiceManager implements Disposable {
       h !== handler;
     });
   }
-  abstract sendMessage(type: ServiceMessageTypeEnum, payload?: object): void;
-  abstract init(): Promise<void>;
+  abstract sendMessage(type: unknown, payload?: unknown): void;
+  abstract init(clientId?: ServiceClientIdEnum): Promise<void>;
   abstract dispose(): void;
 }

@@ -8,5 +8,6 @@ export interface IConfig {
   token?: string;
   yandexClientId?: string;
   serverUrl: string;
+  appUserDataPath?: string;
   [key: string]: string;
 }

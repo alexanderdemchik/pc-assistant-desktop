@@ -1,7 +1,7 @@
 process.env.FORCE_COLOR = 'true'; // required for chalk to work
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { APP_FLAGS } from '../common/constants';
 import { initConfig, updateConfigWithRemoteConfig } from './config';
 import { registerLogger, logger } from './logger';
@@ -14,9 +14,9 @@ import {
 } from './helpers';
 import * as trayManager from './tray';
 import * as windowManager from './window';
-import { setupRemoteCommandsReceiver } from './commands-receiver';
+import * as appManager from './app-manager';
 import * as authManager from './auth-manager';
-import * as desktopSharingService from './desktop-sharing-service';
+import path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const isWithoutUI = process.argv.includes(APP_FLAGS.NO_UI);
@@ -34,7 +34,13 @@ if (!gotTheLock) {
   app.quit();
 }
 
-registerLogger(process.env.LOG_LEVEL);
+registerLogger(process.env.LOG_LEVEL, path.join(app.getPath('userData'), 'logs', 'app-%DATE%.log'));
+
+ipcMain.on('log', (event, level: 'info' | 'error' | 'debug', ...args) => {
+  // @ts-ignore
+  logger.child({ isRenderer: true })[level](...args);
+});
+
 registerSchemesAsPrivileged();
 registerDeepLinksHandler();
 
@@ -50,18 +56,17 @@ async function onReady() {
 
   setupAutolaunch();
 
+  appManager.init();
+
   authManager.init();
 
   trayManager.create();
 
   windowManager.setupEventsListeners();
-  setupRemoteCommandsReceiver();
 
   if (!isAutoLaunched) {
     windowManager.create();
   }
-
-  desktopSharingService.init();
 }
 
 app.on('ready', onReady);

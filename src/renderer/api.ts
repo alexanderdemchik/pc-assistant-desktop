@@ -2,7 +2,7 @@
 import { IAppInfo } from '../common/types/IAppInfo';
 import { IConnectionState } from '../common/types/IConnectionState';
 import { IpcEventNamesEnum } from '../common/types/ipcEventsNames.enum';
-import { ICacheCommandLogEntry } from '../main/cache-manager/types';
+import { ICacheCommandLogEntry } from '../common/cache-manager/types';
 import { IConfig } from '../main/common/types';
 
 export const sendLogByIPC = (level: 'info' | 'debug' | 'error') => {

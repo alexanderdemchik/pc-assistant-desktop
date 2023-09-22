@@ -11,7 +11,7 @@ import Login from './pages/Login';
 import { IConnectionState } from '../common/types/IConnectionState';
 import { IConfig } from '../main/common/types';
 import { IAppInfo } from '../common/types/IAppInfo';
-import { ICacheCommandLogEntry } from '../main/cache-manager/types';
+import { ICacheCommandLogEntry } from '../common/cache-manager/types';
 
 const StyledLoaderWrapper = styled('div')(({ theme }) => ({
   position: 'absolute',

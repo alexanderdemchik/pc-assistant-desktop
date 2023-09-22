@@ -1,10 +1,11 @@
-import { DefaultCommandsEnum, IMatcher } from './types';
+import { ActionTypesEnum } from '../action-handler/actionTypes';
+import { IMatcher } from './types';
 import { distance } from 'fastest-levenshtein';
 
 const commandsMatchersMap = {
-  [DefaultCommandsEnum.SHUTDOWN]: ['выключи', 'выключи компьютер'],
-  [DefaultCommandsEnum.RESTART]: ['перезагрузи', 'рестарт'],
-  [DefaultCommandsEnum.SLEEP]: ['переведи в спящий режим', 'переведи в сон', 'сон'],
+  [ActionTypesEnum.SHUTDOWN]: ['выключи', 'выключи компьютер'],
+  [ActionTypesEnum.RESTART]: ['перезагрузи', 'рестарт'],
+  [ActionTypesEnum.SLEEP]: ['переведи в спящий режим', 'переведи в сон', 'сон'],
 };
 
 export class LevensteinMatcher implements IMatcher {

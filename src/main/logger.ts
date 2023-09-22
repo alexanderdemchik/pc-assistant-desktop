@@ -1,7 +1,5 @@
-import { app, ipcMain } from 'electron';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
-import path from 'path';
 import chalk from 'chalk';
 
 export let logger: winston.Logger;
@@ -32,34 +30,34 @@ function formatter(isConsole: boolean) {
   return winston.format.combine(...formatters);
 }
 
-export function registerLogger(logLevel: string) {
-  logger = winston.createLogger({
-    level: logLevel ?? 'debug',
+export function registerLogger(logLevel = 'debug', logsFileName?: string) {
+  const options = {
+    level: logLevel,
     format: winston.format.json(),
-    transports: [
-      new winston.transports.DailyRotateFile({
-        filename: path.join(app.getPath('userData'), 'logs', 'app-%DATE%.log'),
-        format: formatter(false),
-        datePattern: 'YYYY-MM-DD-HH',
-        maxSize: '20m',
-        maxFiles: '14d',
-      }),
-    ],
-  });
+    transports: [],
+  };
 
   if (process.env.NODE_ENV !== 'production') {
-    logger.add(
+    options.transports.push(
       new winston.transports.Console({
         format: formatter(true),
       })
     );
   }
 
-  const rendererLogger = logger.child({ isRenderer: true });
-  ipcMain.on('log', (event, level: 'info' | 'error' | 'debug', ...args) => {
-    // @ts-ignore
-    rendererLogger[level](...args);
-  });
+  if (logsFileName) {
+    options.transports.push(
+      new winston.transports.DailyRotateFile({
+        filename: logsFileName,
+        format: formatter(false),
+        datePattern: 'YYYY-MM-DD-HH',
+        maxSize: '20m',
+        maxFiles: '14d',
+      })
+    );
+  }
+
+  logger = winston.createLogger(options);
 
   return logger;
 }

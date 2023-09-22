@@ -1,19 +1,17 @@
 import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import { EventsNamesEnum, eventsManager } from './events';
 import { IpcEventNamesEnum } from '../common/types/ipcEventsNames.enum';
-import { remoteCommandsReceiver } from './commands-receiver';
 import { config } from './config';
 import { isAuthorized, isLoading } from './auth-manager';
 import { resolveHtmlPath } from './util';
 import path from 'path';
 import { IConnectionState } from '../common/types/IConnectionState';
 import { logger } from './logger';
-import * as cacheManager from './cache-manager';
+import { cacheManager, connected } from '../main/app-manager';
 
 export let instance: BrowserWindow;
 
 export function notifyStateChange() {
-  const { connected } = remoteCommandsReceiver.getState();
   const state: IConnectionState = { connected, authorized: isAuthorized, loading: isLoading };
 
   logger.debug('notifyStateChange: %o', state);
@@ -32,7 +30,7 @@ export function setupEventsListeners() {
     instance?.focus();
   });
 
-  eventsManager.on(EventsNamesEnum.REMOTE_COMMANDS_RECEIVER_STATE_CHANGE, () => {
+  eventsManager.on(EventsNamesEnum.REMOTE_CONNECTION_STATE_CHANGE, () => {
     notifyStateChange();
   });
 
@@ -45,7 +43,6 @@ export function setupEventsListeners() {
   });
 
   ipcMain.handle(IpcEventNamesEnum.GET_CONNECTION_STATUS, () => {
-    const { connected } = remoteCommandsReceiver.getState();
     return { connected: connected, authorized: isAuthorized, loading: isLoading } as IConnectionState;
   });
 

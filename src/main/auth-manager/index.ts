@@ -14,12 +14,13 @@ export function init() {
 }
 
 export async function handleAuthWithYandexToken(yredirecturl: string) {
-  logger.debug('handleAuthWithYandexToken');
+  logger.debug('handleAuthWithYandexToken' + yredirecturl);
   const tokenExtractionRegex = /access_token=(.*?)&/g;
   const accessToken = tokenExtractionRegex.exec(yredirecturl)[1];
 
   try {
     isLoading = true;
+    logger.debug(`send req to ${config.serverUrl}/auth/yandex`);
     const res = await axios.post(`${config.serverUrl}/auth/yandex`, { accessToken });
 
     const token: string = res.data.accessToken;

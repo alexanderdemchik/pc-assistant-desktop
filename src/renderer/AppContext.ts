@@ -2,7 +2,7 @@ import { createContext } from 'react';
 import { IConfig } from '../main/common/types';
 import { IAppInfo } from '../common/types/IAppInfo';
 import { IConnectionState } from '../common/types/IConnectionState';
-import { ICacheCommandLogEntry } from '../main/cache-manager/types';
+import { ICacheCommandLogEntry } from '../common/cache-manager/types';
 
 export default createContext<{
   connection: IConnectionState;

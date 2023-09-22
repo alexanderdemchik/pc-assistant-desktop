@@ -16,6 +16,12 @@
   },
   "dependencies": {
     "@nut-tree/nut-js": "^3.1.2",
-    "firebase": "^9.22.2"
+    "firebase": "^9.22.2",
+    "native_lib": "file:../../src/native_lib",
+    "ps-node": "^0.1.6",
+    "screenshot-desktop": "^1.15.0"
+  },
+  "devDependencies": {
+    "@types/screenshot-desktop": "^1.12.0"
   }
 }

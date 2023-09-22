@@ -35,6 +35,8 @@ export async function initConfig() {
     }
   }
 
+  config.appUserDataPath = app.getPath('userData');
+
   return config;
 }
 

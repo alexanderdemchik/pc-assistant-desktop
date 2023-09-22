@@ -1,0 +1,17 @@
+{
+  "name": "native_lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "native_lib.js",
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "types": "native_lib.d.ts",
+  "author": "",
+  "gypfile": true,
+  "license": "ISC",
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "node-addon-api": "^7.0.0"
+  }
+}

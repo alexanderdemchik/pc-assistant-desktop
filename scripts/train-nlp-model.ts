@@ -1,21 +1,21 @@
 import { writeFileSync } from 'fs';
 import path from 'path';
-import { DefaultCommandsEnum } from '../src/main/commands-handler/types';
+import { ActionTypesEnum } from '../src/common/action-handler/actionTypes';
 
 const { NlpManager } = require('node-nlp');
 
 const manager = new NlpManager({ languages: ['ru'], forceNER: true });
 
 async function train() {
-  const defaultCommandsTokensMap = {
-    [DefaultCommandsEnum.SHUTDOWN]: ['выключи', 'выключи компьютер'],
-    [DefaultCommandsEnum.RESTART]: ['перезагрузи', 'рестарт'],
-    [DefaultCommandsEnum.SLEEP]: ['переведи в спящий режим', 'спящий', 'сон'],
+  const defaultActionsTokensMap = {
+    [ActionTypesEnum.SHUTDOWN]: ['выключи', 'выключи компьютер'],
+    [ActionTypesEnum.RESTART]: ['перезагрузи', 'рестарт'],
+    [ActionTypesEnum.SLEEP]: ['переведи в спящий режим', 'спящий', 'сон'],
   };
 
-  Object.keys(defaultCommandsTokensMap).forEach((command) => {
-    defaultCommandsTokensMap[command].forEach((token) => {
-      manager.addDocument('ru', token, command);
+  Object.keys(defaultActionsTokensMap).forEach((action) => {
+    defaultActionsTokensMap[action].forEach((token) => {
+      manager.addDocument('ru', token, action);
     });
   });
 
@@ -27,5 +27,5 @@ async function train() {
 (async () => {
   const manager = await train();
 
-  writeFileSync(path.join('src/main/commands-handler/data', 'trained-nlp-model.json'), manager);
+  writeFileSync(path.join('src/main/common/action-matchers/data', 'trained-nlp-model.json'), manager);
 })();

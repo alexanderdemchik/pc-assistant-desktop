@@ -1,9 +1,24 @@
 import { Socket, io } from 'socket.io-client';
-import { CommandsReceiver } from './CommandsReceiver';
-import { AuthError, IConfig } from '../common/types';
+import { AuthError, IConfig } from '../../main/common/types';
+import { Logger } from 'winston';
 
-export class WsCommandsReceiver extends CommandsReceiver {
+interface WsManagerState {
+  connected: boolean;
+  error?: Error;
+}
+
+export class WsConnectionManager {
   private socketInstance: Socket = null;
+  private connected = false;
+  private error: Error = null;
+
+  constructor(
+    private config: IConfig = {} as IConfig,
+    private logger: Logger,
+    private errorHandler: (err: Error) => void,
+    private messageHandler: (message: any) => void,
+    private stateChangeHandler: (state: WsManagerState) => void
+  ) {}
 
   private updateState(connected?: boolean, error?: Error): void {
     this.connected = connected;
@@ -13,7 +28,7 @@ export class WsCommandsReceiver extends CommandsReceiver {
   }
 
   async init(): Promise<void> {
-    this.logger.debug('init', { prefix: 'WSCommandsReceiver' });
+    this.logger.debug('init');
 
     if (!this.config.token) {
       this.error = new AuthError();
@@ -53,9 +68,7 @@ export class WsCommandsReceiver extends CommandsReceiver {
     });
 
     this.socketInstance.on('message', (message) => {
-      if (message.command) {
-        this.commandsHandler(message.command);
-      }
+      this.messageHandler(message);
     });
   }
 
