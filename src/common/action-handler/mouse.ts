@@ -1,29 +1,22 @@
 import { mouse, Button, screen } from '@nut-tree/nut-js';
-import { Coords } from './actionTypes';
-
-enum MouseDirection {
-  UP = 'UP',
-  BOTTOM = 'BOTTOM',
-  LEFT = 'LEFT',
-  RIGHT = 'RIGHT',
-}
+import { Coords, Direction } from './actionTypes';
 
 type MouseButton = Button;
 
-export async function moveWithDirection(direction: MouseDirection, distance: number) {
+export async function moveWithDirection(direction: Direction, distance: number) {
   const currentMouseCoords = await mouse.getPosition();
 
   switch (direction) {
-    case MouseDirection.BOTTOM:
+    case Direction.DOWN:
       currentMouseCoords.y += distance;
       break;
-    case MouseDirection.UP:
+    case Direction.UP:
       currentMouseCoords.y -= distance;
       break;
-    case MouseDirection.LEFT:
+    case Direction.LEFT:
       currentMouseCoords.x -= distance;
       break;
-    case MouseDirection.RIGHT:
+    case Direction.RIGHT:
       currentMouseCoords.x += distance;
   }
 

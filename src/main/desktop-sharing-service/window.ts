@@ -1,6 +1,6 @@
 import Peer from 'peerjs';
 import { getConfig, getSources } from '../../renderer/api';
-// import logger from '../../renderer/logger';
+import logger from '../../renderer/logger';
 
 export const createEmptyAudioTrack = () => {
   const ctx = new AudioContext();
@@ -28,7 +28,7 @@ const mediaStream = new MediaStream([audioTrack, videoTrack]);
 async function main() {
   // logger.debug('Started hidden desktop-sharing window');
 
-  // const config = await getConfig();
+  const config = await getConfig();
   const sources = await getSources();
 
   // logger.debug('%o', config);
@@ -88,52 +88,54 @@ async function main() {
       .catch((e) => console.log('Error: ' + e));
   });
 
-  // setTimeout(() => {
-  //   const peer2 = new Peer('asdads', peerOptions);
+  setTimeout(() => {
+    const peer2 = new Peer('asdads', peerOptions);
 
-  //   peer2.on('open', () => {
-  //     const call = peer2.call(config.deviceId, mediaStream, { metadata: { screen: 0 } });
-  //     const call2 = peer2.call(config.deviceId, mediaStream, { metadata: { screen: 1 } });
+    peer2.on('open', () => {
+      const call = peer2.call(config.deviceId, mediaStream, { metadata: { screen: 0 } });
+      const call2 = peer2.call(config.deviceId, mediaStream, { metadata: { screen: 1 } });
 
-  //     call.on('stream', (stream) => {
-  //       logger.debug('stream');
-  //       const video = document.createElement('video');
-  //       document.body.appendChild(video);
-  //       video.autoplay = true;
-  //       video.srcObject = stream;
-  //     });
+      call.on('stream', (stream) => {
+        logger.debug('stream');
+        const video = document.createElement('video');
+        document.body.appendChild(video);
+        video.autoplay = true;
+        video.srcObject = stream;
+      });
 
-  //     call2.on('stream', (stream) => {
-  //       logger.debug('stream');
-  //       const video = document.createElement('video');
-  //       document.body.appendChild(video);
-  //       video.autoplay = true;
-  //       video.srcObject = stream;
-  //     });
-  //   });
-  // }, 5000);
+      call2.on('stream', (stream) => {
+        logger.debug('stream');
+        const video = document.createElement('video');
+        document.body.appendChild(video);
+        video.autoplay = true;
+        video.srcObject = stream;
+      });
+    });
+  }, 5000);
 
-  //   navigator.mediaDevices
-  //     .getUserMedia({
-  //       audio: false,
-  //       video: {
-  //         // @ts-ignore
-  //         mandatory: {
-  //           cursor: 'never',
-  //           chromeMediaSource: 'desktop',
-  //           chromeMediaSourceId: sources[0],
-  //           minWidth: 1280,
-  //           maxWidth: 1280,
-  //           minHeight: 720,
-  //           maxHeight: 720,
-  //         },
-  //       },
-  //     })
-  //     .then((mediaStream) => {
-  //       // Answer call with screen's display data stream
-  //       video.srcObject = mediaStream;
-  //       video.play();
-  //     });
+  navigator.mediaDevices
+    .getUserMedia({
+      audio: false,
+      video: {
+        // @ts-ignore
+        mandatory: {
+          cursor: 'never',
+          chromeMediaSource: 'desktop',
+          chromeMediaSourceId: sources[0],
+          minWidth: 1280,
+          maxWidth: 1280,
+          minHeight: 720,
+          maxHeight: 720,
+        },
+      },
+    })
+    .then((mediaStream) => {
+      const video = document.createElement('video');
+      document.body.appendChild(video);
+      // Answer call with screen's display data stream
+      video.srcObject = mediaStream;
+      video.play();
+    });
 }
 
 main();

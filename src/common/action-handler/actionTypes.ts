@@ -16,11 +16,22 @@ export interface Coords {
   y: number;
 }
 
+export enum Direction {
+  UP = 'UP',
+  DOWN = 'DOWN',
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+}
+
 export interface ActionEvent<T extends ActionTypesEnum> {
   type: ActionTypesEnum;
   payload: ActionEventPayloadMap[T];
 }
 
 export interface ActionEventPayloadMap extends Record<ActionTypesEnum, any> {
-  [ActionTypesEnum.MOUSE_MOVE]: Coords;
+  [ActionTypesEnum.MOUSE_MOVE]: {
+    coords?: Coords;
+    direction?: Direction;
+    distance?: number;
+  };
 }

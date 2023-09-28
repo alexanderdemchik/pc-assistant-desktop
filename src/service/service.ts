@@ -15,6 +15,7 @@ import { NlpMatcher } from '../common/action-matchers/NlpMatcher';
 import { ICacheCommandLogEntry } from '../common/cache-manager/types';
 import { launchProcessAsSystemUser } from 'native_lib';
 import { ACTION_EXECUTOR_APP_NAME } from '../common/constants/appNames';
+import { extractActionPayload } from '../common/action-matchers/helpers';
 
 let config: IConfig;
 
@@ -33,7 +34,7 @@ let cacheManager: CacheManager;
 const matcher = new NlpMatcher();
 
 (async () => {
-  registerLogger(undefined, `${SERVICE_FOLDER_PATH}/logs/service`);
+  registerLogger(undefined, `${SERVICE_FOLDER_PATH}/logs/service-%DATE%.log`);
 
   config = await readConfig();
 
@@ -58,16 +59,26 @@ const matcher = new NlpMatcher();
 
         if (parsed.type === ServiceMessageTypeEnum.SET_CLIENT_ID) {
           connections.set(socket, { clientId: parsed.payload });
-          sendMessageToUi({
-            type: ServiceMessageTypeEnum.STATE_CHANGE,
-            payload: wsManager.getState(),
-          });
+          parsed.payload === ServiceClientIdEnum.UI
+            ? sendMessageToUi({
+                type: ServiceMessageTypeEnum.STATE_CHANGE,
+                payload: wsManager.getState(),
+              })
+            : sendMessageToBackgroundManager({
+                type: ServiceMessageTypeEnum.CONFIG,
+                payload: config,
+              });
         }
 
         if (parsed.type === ServiceMessageTypeEnum.CONFIG) {
+          config = parsed.payload;
           await fs.writeFile(path.join(SERVICE_FOLDER_PATH, CONFIG_FILE_NAME), JSON.stringify(parsed.payload));
           wsManager.updateConfig(parsed.payload);
           initCache(parsed.payload);
+          sendMessageToBackgroundManager({
+            type: ServiceMessageTypeEnum.CONFIG,
+            payload: config,
+          });
         }
       } catch (e) {
         logger.error('%o', e);
@@ -111,7 +122,10 @@ const matcher = new NlpMatcher();
 
         if (matchedAction) {
           logger.debug(`matched command ${message.command}`);
-          sendMessageToBackgroundManager({ type: matchedAction });
+          sendMessageToBackgroundManager({
+            type: matchedAction,
+            payload: extractActionPayload(matchedAction, message.command),
+          });
 
           addCommandToLog(message.command, true);
         } else {

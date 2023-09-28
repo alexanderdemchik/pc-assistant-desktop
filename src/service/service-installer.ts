@@ -44,14 +44,18 @@ async function run() {
           try {
             cp.execSync(`${SERVICE_EXE} stop && ${SERVICE_EXE} uninstall`, { cwd: SERVICE_FOLDER_PATH });
           } catch (e) {
-            // ignore
+            console.log(e);
+          }
+
+          try {
+            await killProcessByName(ACTION_EXECUTOR_APP_NAME);
+            await killProcessByName(DESKTOP_CHANGE_LISTENER_APP_NAME);
+          } catch (e) {
+            console.log(e);
           }
 
           console.log('remove service folder');
           fs.rmSync(SERVICE_FOLDER_PATH, { force: true, recursive: true });
-
-          await killProcessByName(ACTION_EXECUTOR_APP_NAME);
-          await killProcessByName(DESKTOP_CHANGE_LISTENER_APP_NAME);
         } else {
           break;
         }
@@ -108,25 +112,31 @@ async function run() {
 }
 
 async function killProcessByName(command: string) {
-  return new Promise((resolve) => {
+  const list = await new Promise((resolve, reject) => {
     ps.lookup(
       {
         command,
       },
       function (err, resultList) {
-        if (!err) {
-          resultList.forEach(function (process) {
-            process.pid &&
-              ps.kill(process.pid, 'SIGKILL', () => {
-                resolve(true);
-              });
-          });
-        } else {
-          resolve(true);
+        if (err) {
+          reject(err);
         }
+        resolve(resultList);
       }
     );
   });
+
+  console.log(JSON.stringify(list));
+
+  const process = list[0];
+
+  if (process) {
+    await new Promise((resolve, reject) => {
+      ps.kill(process.pid, (err) => {
+        err ? reject(err) : resolve(true);
+      });
+    });
+  }
 }
 
 run();

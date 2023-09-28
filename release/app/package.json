@@ -1,7 +1,7 @@
 {
   "name": "voice-pc-assistant",
   "productName": "Voice PC Assistant",
-  "version": "0.0.0-alpha",
+  "version": "0.0.2-alpha",
   "description": "A foundation for scalable desktop apps",
   "license": "MIT",
   "author": {
@@ -11,17 +11,20 @@
   "main": "./dist/main/main.js",
   "scripts": {
     "rebuild": "node -r ts-node/register ../../scripts/electron-rebuild.js",
-    "postinstall": "npm run rebuild && npm run link-modules",
-    "link-modules": "node -r ts-node/register ../../scripts/link-modules.ts"
+    "link-modules": "node -r ts-node/register ../../scripts/link-modules.ts",
+    "postinstall": "npm run rebuild && npm run link-modules"
+  },
+  "opencv4nodejs": {
+    "autoBuildOpencvVersion": "4.6.0",
+    "autoBuildFlags": "-DBUILD_opencv_world=1 -DBUILD_LIST=core,highgui,videoio -DOPENCV_FORCE_3RDPARTY_BUILD=ON -DBUILD_PNG=ON -DBUILD_TIFF=ON -DBUILD_JASPER=ON -DBUILD_JPEG=ON -DBUILD_ZLIB=ON -DBUILD_OPENEXR=ON -DWITH_FFMPEG=OFF -DWITH_GSTREAMER=OFF -DBUILD_USE_SYMLINKS=OFF -DWITH_VTK=OFF"
   },
   "dependencies": {
     "@nut-tree/nut-js": "^3.1.2",
+    "@u4/opencv-build": "^0.7.8",
+    "@u4/opencv4nodejs": "^6.5.2",
     "firebase": "^9.22.2",
     "native_lib": "file:../../src/native_lib",
     "ps-node": "^0.1.6",
     "screenshot-desktop": "^1.15.0"
-  },
-  "devDependencies": {
-    "@types/screenshot-desktop": "^1.12.0"
   }
 }

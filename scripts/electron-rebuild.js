@@ -5,7 +5,7 @@ import webpackPaths from '../webpack/webpack.paths';
 
 if (Object.keys(dependencies || {}).length > 0 && fs.existsSync(webpackPaths.appNodeModulesPath)) {
   const electronRebuildCmd =
-    '../../node_modules/.bin/electron-rebuild --force --types prod,dev,optional --module-dir .';
+    '../../node_modules/.bin/electron-rebuild --force --types prod,dev,optional --module-dir . -o @nut-tree/nut-js,firebase,native_lib,ps-node,screenshot-desktop';
   const cmd = process.platform === 'win32' ? electronRebuildCmd.replace(/\//g, '\\') : electronRebuildCmd;
   execSync(cmd, {
     cwd: webpackPaths.appPath,
